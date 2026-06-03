@@ -21,16 +21,20 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-// Importaciones de tus componentes reutilizables
+// 1. Importación del ViewModel nativo
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.proyecto_aplicaciones_moviles.ui.components.WorkConnectButton
 import com.example.proyecto_aplicaciones_moviles.ui.components.WorkConnectTextField
 
 @Composable
 fun RegisterScreen(
     onNavigateBack: () -> Unit,
-    onRegisterSuccess: () -> Unit
+    onRegisterSuccess: () -> Unit,
+    // 2. Inyectamos el ViewModel
+    viewModel: AuthViewModel = viewModel()
 ) {
     // Estados de los campos de texto
     var fullName by remember { mutableStateOf("") }
@@ -44,16 +48,19 @@ fun RegisterScreen(
     // Estado del Checkbox de términos y condiciones
     var termsAccepted by remember { mutableStateOf(false) }
 
+    // 3. Observamos el estado (cargando, errores)
+    val state by viewModel.state.collectAsState()
+
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .background(Color(0xFFF8F9FA)) // Fondo sutil
+            .background(Color(0xFFF8F9FA))
             .padding(horizontal = 24.dp)
             .verticalScroll(rememberScrollState()),
     ) {
         Spacer(modifier = Modifier.height(16.dp))
 
-        // 1. BARRA SUPERIOR
+        // BARRA SUPERIOR
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween,
@@ -75,7 +82,7 @@ fun RegisterScreen(
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // 2. TÍTULOS
+        // TÍTULOS
         Text(text = "Crea tu cuenta", fontSize = 28.sp, fontWeight = FontWeight.Bold, color = Color.Black)
         Spacer(modifier = Modifier.height(8.dp))
         Text(
@@ -86,7 +93,7 @@ fun RegisterScreen(
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // 3. TARJETAS DE SELECCIÓN DE ROL
+        // TARJETAS DE SELECCIÓN DE ROL
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -111,12 +118,15 @@ fun RegisterScreen(
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // 4. CAMPOS DE FORMULARIO
+        // CAMPOS DE FORMULARIO
         Text(text = "Nombre Completo", fontSize = 14.sp, fontWeight = FontWeight.Medium)
         Spacer(modifier = Modifier.height(4.dp))
         WorkConnectTextField(
             value = fullName,
-            onValueChange = { fullName = it },
+            onValueChange = {
+                fullName = it
+                viewModel.clearError()
+            },
             label = "Ej. Alex Morgan"
         )
 
@@ -126,7 +136,10 @@ fun RegisterScreen(
         Spacer(modifier = Modifier.height(4.dp))
         WorkConnectTextField(
             value = email,
-            onValueChange = { email = it },
+            onValueChange = {
+                email = it
+                viewModel.clearError()
+            },
             label = "nombre@ejemplo.com"
         )
 
@@ -136,7 +149,10 @@ fun RegisterScreen(
         Spacer(modifier = Modifier.height(4.dp))
         WorkConnectTextField(
             value = password,
-            onValueChange = { password = it },
+            onValueChange = {
+                password = it
+                viewModel.clearError()
+            },
             label = "Mínimo 8 caracteres",
             isPassword = !passwordVisible,
             trailingIcon = {
@@ -149,37 +165,61 @@ fun RegisterScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // 5. TÉRMINOS Y CONDICIONES
+        // TÉRMINOS Y CONDICIONES
         Row(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.fillMaxWidth()
         ) {
             Checkbox(
                 checked = termsAccepted,
-                onCheckedChange = { termsAccepted = it },
+                onCheckedChange = {
+                    termsAccepted = it
+                    viewModel.clearError()
+                },
                 colors = CheckboxDefaults.colors(checkedColor = Color(0xFF1A365D))
             )
             Text(text = "Acepto los ", fontSize = 12.sp, color = Color.Gray)
             Text(text = "Términos de Servicio", fontSize = 12.sp, color = Color(0xFF1A365D), modifier = Modifier.clickable { })
-            Text(text = " y la ", fontSize = 12.sp, color = Color.Gray)
-            Text(text = "Política", fontSize = 12.sp, color = Color(0xFF1A365D), modifier = Modifier.clickable { })
+        }
+
+        // 4. SECCIÓN DE MENSAJE DE ERROR
+        if (state.errorMessage != null) {
+            Text(
+                text = state.errorMessage!!,
+                color = MaterialTheme.colorScheme.error,
+                fontSize = 14.sp,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 8.dp, bottom = 8.dp),
+                textAlign = TextAlign.Center
+            )
+        } else {
+            Spacer(modifier = Modifier.height(24.dp))
+        }
+
+        // 5. BOTÓN CREAR CUENTA CON INDICADOR DE CARGA
+        if (state.isLoading) {
+            Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                CircularProgressIndicator(color = Color(0xFF1A365D))
+            }
+        } else {
+            WorkConnectButton(
+                text = "Crear Cuenta ->",
+                onClick = {
+                    viewModel.registerUser(
+                        fullName = fullName,
+                        email = email,
+                        password = password,
+                        termsAccepted = termsAccepted,
+                        onNavigateToLogin = { onRegisterSuccess() }
+                    )
+                }
+            )
         }
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        // 6. BOTÓN CREAR CUENTA
-        WorkConnectButton(
-            text = "Crear Cuenta ->",
-            onClick = {
-                if (termsAccepted) {
-                    onRegisterSuccess()
-                }
-            }
-        )
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-        // 7. DIVISOR "O CONTINUAR CON"
+        // DIVISOR "O CONTINUAR CON"
         Row(
             verticalAlignment = Alignment.CenterVertically,
             modifier = Modifier.fillMaxWidth()
@@ -196,7 +236,7 @@ fun RegisterScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // 8. BOTÓN ÚNICO DE GOOGLE
+        // BOTÓN ÚNICO DE GOOGLE
         OutlinedButton(
             onClick = { },
             modifier = Modifier
@@ -208,15 +248,6 @@ fun RegisterScreen(
             ),
             border = BorderStroke(1.dp, Color.LightGray)
         ) {
-            // Nota: Descomenta el bloque de Image cuando agregues tu ícono a res/drawable
-            /*
-            Image(
-                painter = painterResource(id = R.drawable.ic_google),
-                contentDescription = "Logo Google",
-                modifier = Modifier.size(20.dp)
-            )
-            Spacer(modifier = Modifier.width(12.dp))
-            */
             Text(
                 text = "Continuar con Google",
                 color = Color.Black,
@@ -227,7 +258,7 @@ fun RegisterScreen(
 
         Spacer(modifier = Modifier.height(32.dp))
 
-        // 9. TEXTO INFERIOR PARA VOLVER AL LOGIN
+        // TEXTO INFERIOR PARA VOLVER AL LOGIN
         Row(
             modifier = Modifier.fillMaxWidth().padding(bottom = 32.dp),
             horizontalArrangement = Arrangement.Center
@@ -243,7 +274,7 @@ fun RegisterScreen(
     }
 }
 
-// --- COMPONENTE LOCAL PARA LAS TARJETAS DE ROL ---
+// COMPONENTE LOCAL PARA LAS TARJETAS DE ROL
 @Composable
 fun RoleCard(
     modifier: Modifier = Modifier,
