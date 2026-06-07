@@ -13,6 +13,8 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.proyecto_aplicaciones_moviles.presentation.explore.ExploreScreen
+import com.example.proyecto_aplicaciones_moviles.presentation.home.HomeScreen
 import com.example.proyecto_aplicaciones_moviles.presentation.main.components.BottomNavItem
 import com.example.proyecto_aplicaciones_moviles.presentation.main.components.WorkConnectBottomBar
 
@@ -36,10 +38,10 @@ fun MainScreen() {
             modifier = Modifier.padding(paddingValues) // Respeta el espacio de la barra inferior
         ) {
             composable(BottomNavItem.Inicio.route) {
-                PlaceholderScreen("Pantalla de Inicio")
+                HomeScreen()
             }
             composable(BottomNavItem.Explorar.route) {
-                PlaceholderScreen("Pantalla para Explorar Proyectos")
+                ExploreScreen()
             }
             composable(BottomNavItem.Publicar.route) {
                 PlaceholderScreen("Publicar un nuevo proyecto")
