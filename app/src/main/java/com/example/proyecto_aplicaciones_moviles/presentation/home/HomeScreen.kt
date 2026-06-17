@@ -24,9 +24,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.proyecto_aplicaciones_moviles.presentation.main.SharedProjectViewModel
+import androidx.compose.foundation.lazy.items
 
 @Composable
-fun HomeScreen() {
+fun HomeScreen(
+    viewModel: SharedProjectViewModel
+) {
+    val projects by viewModel.projects.collectAsState()
     // Scaffold interno para manejar el botón flotante (+) sin interferir con el BottomBar de MainScreen
     Scaffold(
         floatingActionButton = {
@@ -132,43 +137,17 @@ fun HomeScreen() {
             }
 
             // 5. LISTA DE TARJETAS (Mock data basada en tus imágenes)
-            item {
+            items(projects) { project ->
                 ProjectCard(
-                    title = "Estrategia de Implementación de IA Empresarial",
-                    price = "S/.2,500",
-                    priceType = "Precio Fijo",
-                    company = "TechCorp Global",
-                    timeAgo = "Publicado hace 2h",
-                    description = "Buscamos un estratega senior de IA para liderar el diseño y la hoja de ruta de una integración de LLM a nivel empresarial...",
-                    tags = listOf("Machine Learning", "Estrategia", "Python"),
-                    badgeText = "Entrega Urgente",
-                    isPrimaryAction = true // Botón azul sólido
-                )
-            }
-
-            item {
-                ProjectCard(
-                    title = "Diseño UI/UX para Fintech",
-                    price = "S/.850",
-                    priceType = "6 meses",
-                    company = "Est. 20 h/semana",
-                    timeAgo = "",
-                    description = "Buscamos un diseñador detallista para renovar nuestro panel de trading móvil y...",
-                    tags = listOf("Figma", "Fintech"),
-                    isPrimaryAction = false // Botón delineado
-                )
-            }
-
-            item {
-                ProjectCard(
-                    title = "App Web Fullstack",
-                    price = "S/.1,200",
-                    priceType = "Precio Fijo",
-                    company = "2 semanas",
-                    timeAgo = "",
-                    description = "Migración de código base PHP existente a Next.js con backend Supabase. Se...",
-                    tags = listOf("Next.js", "Fullstack"),
-                    isPrimaryAction = false
+                    title = project.title,
+                    price = project.price,
+                    priceType = project.priceType,
+                    company = project.company,
+                    timeAgo = project.timeAgo,
+                    description = project.description,
+                    tags = project.tags,
+                    badgeText = project.badgeText,
+                    isPrimaryAction = project.isPrimaryAction
                 )
             }
 
