@@ -1,4 +1,4 @@
-package com.example.proyecto_aplicaciones_moviles.ui.components
+package com.example.proyecto_aplicaciones_moviles.presentation.components
 
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height

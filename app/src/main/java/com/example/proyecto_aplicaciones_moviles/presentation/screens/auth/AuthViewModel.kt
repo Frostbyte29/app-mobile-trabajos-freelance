@@ -1,4 +1,4 @@
-package com.example.proyecto_aplicaciones_moviles.presentation.auth
+package com.example.proyecto_aplicaciones_moviles.presentation.screens.auth
 
 import android.util.Patterns
 import androidx.lifecycle.ViewModel

@@ -1,4 +1,4 @@
-package com.example.proyecto_aplicaciones_moviles.presentation.explore
+package com.example.proyecto_aplicaciones_moviles.presentation.screens.explore
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background

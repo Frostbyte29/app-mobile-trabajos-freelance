@@ -1,4 +1,4 @@
-package com.example.proyecto_aplicaciones_moviles.presentation.auth
+package com.example.proyecto_aplicaciones_moviles.presentation.screens.auth
 
 
 import androidx.compose.foundation.BorderStroke
@@ -18,7 +18,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.proyecto_aplicaciones_moviles.ui.components.WorkConnectButton
+import com.example.proyecto_aplicaciones_moviles.presentation.components.WorkConnectButton
 
 @Composable
 fun SplashScreen(

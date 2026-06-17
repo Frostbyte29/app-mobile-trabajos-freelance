@@ -1,4 +1,4 @@
-package com.example.proyecto_aplicaciones_moviles.presentation.auth
+package com.example.proyecto_aplicaciones_moviles.presentation.screens.auth
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
@@ -20,8 +20,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 // 1. Nueva importación del ViewModel nativo de Jetpack Compose
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.proyecto_aplicaciones_moviles.ui.components.WorkConnectButton
-import com.example.proyecto_aplicaciones_moviles.ui.components.WorkConnectTextField
+import com.example.proyecto_aplicaciones_moviles.presentation.components.WorkConnectButton
+import com.example.proyecto_aplicaciones_moviles.presentation.components.WorkConnectTextField
 
 @Composable
 fun LoginScreen(

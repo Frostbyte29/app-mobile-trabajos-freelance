@@ -1,4 +1,4 @@
-package com.example.proyecto_aplicaciones_moviles.presentation.main.components
+package com.example.proyecto_aplicaciones_moviles.presentation.screens.main.components
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddCircle

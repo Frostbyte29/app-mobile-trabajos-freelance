@@ -1,4 +1,4 @@
-package com.example.proyecto_aplicaciones_moviles.presentation.navigation
+package com.example.proyecto_aplicaciones_moviles.core.navigation
 
 sealed class AppRoute(val route: String) {
     object Splash: AppRoute("splash_screen")

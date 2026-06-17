@@ -1,7 +1,6 @@
-package com.example.proyecto_aplicaciones_moviles.presentation.home
+package com.example.proyecto_aplicaciones_moviles.presentation.screens.home
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -24,7 +23,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.proyecto_aplicaciones_moviles.presentation.main.SharedProjectViewModel
+import com.example.proyecto_aplicaciones_moviles.presentation.screens.main.SharedProjectViewModel
 import androidx.compose.foundation.lazy.items
 
 @Composable

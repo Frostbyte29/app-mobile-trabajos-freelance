@@ -1,14 +1,14 @@
-package com.example.proyecto_aplicaciones_moviles.presentation.navigation
+package com.example.proyecto_aplicaciones_moviles.core.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
-import com.example.proyecto_aplicaciones_moviles.presentation.auth.LoginScreen
-import com.example.proyecto_aplicaciones_moviles.presentation.auth.RegisterScreen
-import com.example.proyecto_aplicaciones_moviles.presentation.auth.SplashScreen
-import com.example.proyecto_aplicaciones_moviles.presentation.main.MainScreen
+import com.example.proyecto_aplicaciones_moviles.presentation.screens.auth.LoginScreen
+import com.example.proyecto_aplicaciones_moviles.presentation.screens.auth.RegisterScreen
+import com.example.proyecto_aplicaciones_moviles.presentation.screens.auth.SplashScreen
+import com.example.proyecto_aplicaciones_moviles.presentation.screens.main.MainScreen
 
 @Composable
 fun RootNavGraph(navController: NavHostController){

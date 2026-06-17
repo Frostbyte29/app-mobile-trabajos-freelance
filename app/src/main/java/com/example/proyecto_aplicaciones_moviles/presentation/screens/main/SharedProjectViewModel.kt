@@ -1,4 +1,4 @@
-package com.example.proyecto_aplicaciones_moviles.presentation.main
+package com.example.proyecto_aplicaciones_moviles.presentation.screens.main
 
 import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.flow.MutableStateFlow

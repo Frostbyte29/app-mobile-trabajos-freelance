@@ -1,4 +1,4 @@
-package com.example.proyecto_aplicaciones_moviles.presentation.main
+package com.example.proyecto_aplicaciones_moviles.presentation.screens.main
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -15,12 +15,12 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.proyecto_aplicaciones_moviles.presentation.explore.ExploreScreen
-import com.example.proyecto_aplicaciones_moviles.presentation.home.HomeScreen
-import com.example.proyecto_aplicaciones_moviles.presentation.main.components.BottomNavItem
-import com.example.proyecto_aplicaciones_moviles.presentation.main.components.WorkConnectBottomBar
+import com.example.proyecto_aplicaciones_moviles.presentation.screens.explore.ExploreScreen
+import com.example.proyecto_aplicaciones_moviles.presentation.screens.home.HomeScreen
+import com.example.proyecto_aplicaciones_moviles.presentation.screens.main.components.BottomNavItem
+import com.example.proyecto_aplicaciones_moviles.presentation.screens.main.components.WorkConnectBottomBar
 // 2. Importamos la pantalla de publicar que vas a crear
-import com.example.proyecto_aplicaciones_moviles.presentation.publish.PublishScreen
+import com.example.proyecto_aplicaciones_moviles.presentation.screens.publish.PublishScreen
 
 
 @Composable
