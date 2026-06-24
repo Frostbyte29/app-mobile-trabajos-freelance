@@ -12,9 +12,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.proyecto_aplicaciones_moviles.presentation.screens.main.SharedProjectViewModel
 import com.example.proyecto_aplicaciones_moviles.presentation.components.WorkConnectButton
 import com.example.proyecto_aplicaciones_moviles.presentation.components.WorkConnectTextField
+import com.example.proyecto_aplicaciones_moviles.presentation.main.SharedProjectViewModel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -116,10 +116,13 @@ fun PublishScreen(
                         if (title.isNotBlank() && budget.isNotBlank() && description.isNotBlank()) {
                             coroutineScope.launch {
                                 isLoading = true
-                                delay(1500) // Simular carga
-                                viewModel.addProject(title, budget, category, description)
+                                // Llamamos a AWS y esperamos la respuesta (ya no necesitamos el delay falso)
+                                val guardadoExitoso = viewModel.addProject(title, budget, category, description)
                                 isLoading = false
-                                showSuccess = true
+
+                                if (guardadoExitoso) {
+                                    showSuccess = true
+                                }
                             }
                         }
                     }
