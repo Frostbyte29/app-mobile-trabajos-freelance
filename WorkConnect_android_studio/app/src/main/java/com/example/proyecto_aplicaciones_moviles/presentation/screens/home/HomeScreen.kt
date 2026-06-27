@@ -5,6 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -23,15 +24,18 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.example.proyecto_aplicaciones_moviles.presentation.screens.main.SharedProjectViewModel
-import androidx.compose.foundation.lazy.items
+import com.example.proyecto_aplicaciones_moviles.presentation.main.SharedProjectViewModel
+// Solo una importación de tu ViewModel correcto
+
 
 @Composable
 fun HomeScreen(
     viewModel: SharedProjectViewModel
 ) {
+    // 1. Escuchamos los proyectos y el estado de carga que vienen de AWS
     val projects by viewModel.projects.collectAsState()
-    // Scaffold interno para manejar el botón flotante (+) sin interferir con el BottomBar de MainScreen
+    val isLoading by viewModel.isLoading.collectAsState()
+
     Scaffold(
         floatingActionButton = {
             FloatingActionButton(
@@ -43,7 +47,7 @@ fun HomeScreen(
                 Icon(imageVector = Icons.Filled.Add, contentDescription = "Agregar")
             }
         },
-        containerColor = Color(0xFFF8F9FA) // Fondo sutil de toda la pantalla
+        containerColor = Color(0xFFF8F9FA)
     ) { paddingValues ->
 
         LazyColumn(
@@ -63,7 +67,6 @@ fun HomeScreen(
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        // Avatar (Placeholder)
                         Box(
                             modifier = Modifier
                                 .size(40.dp)
@@ -135,19 +138,32 @@ fun HomeScreen(
                 }
             }
 
-            // 5. LISTA DE TARJETAS (Mock data basada en tus imágenes)
-            items(projects) { project ->
-                ProjectCard(
-                    title = project.title,
-                    price = project.price,
-                    priceType = project.priceType,
-                    company = project.company,
-                    timeAgo = project.timeAgo,
-                    description = project.description,
-                    tags = project.tags,
-                    badgeText = project.badgeText,
-                    isPrimaryAction = project.isPrimaryAction
-                )
+            // 5. LISTA DE TARJETAS (Conectada a AWS)
+            if (isLoading) {
+                // Si está cargando, mostramos la ruedita de progreso centrada
+                item {
+                    Box(
+                        modifier = Modifier.fillMaxWidth().padding(32.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        CircularProgressIndicator(color = Color(0xFF1A365D))
+                    }
+                }
+            } else {
+                // Si ya cargó, mostramos las tarjetas mapeando los nuevos datos
+                items(projects) { project ->
+                    ProjectCard(
+                        title = project.title,
+                        price = "S/.${project.budget}", // Convertimos el número a formato moneda
+                        priceType = "Precio Fijo",
+                        company = project.company,
+                        timeAgo = "Reciente",
+                        description = project.description,
+                        tags = listOf(project.category), // Ponemos la categoría como etiqueta
+                        badgeText = "Nuevo",
+                        isPrimaryAction = true
+                    )
+                }
             }
 
             // 6. TARJETA DE TALENTO DESTACADO

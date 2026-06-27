@@ -15,6 +15,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.proyecto_aplicaciones_moviles.di.AppContainer
+import com.example.proyecto_aplicaciones_moviles.presentation.main.SharedProjectViewModel
 import com.example.proyecto_aplicaciones_moviles.presentation.screens.explore.ExploreScreen
 import com.example.proyecto_aplicaciones_moviles.presentation.screens.home.HomeScreen
 import com.example.proyecto_aplicaciones_moviles.presentation.screens.main.components.BottomNavItem
@@ -28,7 +30,7 @@ fun MainScreen() {
     val bottomNavController = rememberNavController()
 
     // 3. NUEVO: Creamos el "Cerebro" compartido que guardará los proyectos en memoria
-    val sharedViewModel: SharedProjectViewModel = viewModel()
+    val sharedViewModel: SharedProjectViewModel = viewModel(factory = AppContainer.SharedViewModelFactory)
 
     Scaffold(
         bottomBar = {
