@@ -24,8 +24,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-// 1. Importación del ViewModel nativo
 import androidx.lifecycle.viewmodel.compose.viewModel
+
+// Importación clave para conectar con la fábrica de dependencias
+import com.example.proyecto_aplicaciones_moviles.di.AppContainer
+
+// Asegúrate de que las rutas a tus componentes sean las correctas
 import com.example.proyecto_aplicaciones_moviles.presentation.components.WorkConnectButton
 import com.example.proyecto_aplicaciones_moviles.presentation.components.WorkConnectTextField
 
@@ -33,8 +37,8 @@ import com.example.proyecto_aplicaciones_moviles.presentation.components.WorkCon
 fun RegisterScreen(
     onNavigateBack: () -> Unit,
     onRegisterSuccess: () -> Unit,
-    // 2. Inyectamos el ViewModel
-    viewModel: AuthViewModel = viewModel()
+    // Inyectamos el ViewModel usando la fábrica que creamos
+    viewModel: AuthViewModel = viewModel(factory = AppContainer.SharedViewModelFactory)
 ) {
     // Estados de los campos de texto
     var fullName by remember { mutableStateOf("") }
@@ -48,7 +52,7 @@ fun RegisterScreen(
     // Estado del Checkbox de términos y condiciones
     var termsAccepted by remember { mutableStateOf(false) }
 
-    // 3. Observamos el estado (cargando, errores)
+    // Observamos el estado del ViewModel (cargando, errores)
     val state by viewModel.state.collectAsState()
 
     Column(
@@ -182,7 +186,7 @@ fun RegisterScreen(
             Text(text = "Términos de Servicio", fontSize = 12.sp, color = Color(0xFF1A365D), modifier = Modifier.clickable { })
         }
 
-        // 4. SECCIÓN DE MENSAJE DE ERROR
+        // MENSAJE DE ERROR
         if (state.errorMessage != null) {
             Text(
                 text = state.errorMessage!!,
@@ -197,7 +201,7 @@ fun RegisterScreen(
             Spacer(modifier = Modifier.height(24.dp))
         }
 
-        // 5. BOTÓN CREAR CUENTA CON INDICADOR DE CARGA
+        // BOTÓN CREAR CUENTA CON INDICADOR DE CARGA
         if (state.isLoading) {
             Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
                 CircularProgressIndicator(color = Color(0xFF1A365D))
@@ -210,6 +214,7 @@ fun RegisterScreen(
                         fullName = fullName,
                         email = email,
                         password = password,
+                        roleId = selectedRole, //
                         termsAccepted = termsAccepted,
                         onNavigateToLogin = { onRegisterSuccess() }
                     )
@@ -274,6 +279,7 @@ fun RegisterScreen(
     }
 }
 
+
 // COMPONENTE LOCAL PARA LAS TARJETAS DE ROL
 @Composable
 fun RoleCard(
@@ -287,14 +293,19 @@ fun RoleCard(
     val borderColor = if (isSelected) Color(0xFF1A365D) else Color.LightGray
     val backgroundColor = if (isSelected) Color(0xFFF0F4FF) else Color.Transparent
 
+    // 1. El Surface se queda solo con el diseño y el "peso" (weight) que viene del modifier
     Surface(
-        modifier = modifier.clickable { onClick() },
+        modifier = modifier,
         shape = RoundedCornerShape(12.dp),
         border = BorderStroke(1.dp, borderColor),
         color = backgroundColor
     ) {
+        // 2. Ponemos el área de clic ADENTRO de la tarjeta (en la Column)
         Column(
-            modifier = Modifier.padding(16.dp),
+            modifier = Modifier
+                .clickable { onClick() } // ¡El clic ahora vive aquí adentro!
+                .padding(16.dp)
+                .fillMaxWidth(),
             horizontalAlignment = Alignment.Start
         ) {
             Icon(imageVector = icon, contentDescription = title, tint = Color(0xFF1A365D), modifier = Modifier.size(24.dp))

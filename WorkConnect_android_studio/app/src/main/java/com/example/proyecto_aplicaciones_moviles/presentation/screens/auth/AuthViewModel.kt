@@ -3,6 +3,8 @@ package com.example.proyecto_aplicaciones_moviles.presentation.screens.auth
 import android.util.Patterns
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.proyecto_aplicaciones_moviles.data.remote.UserRequestDto
+import com.example.proyecto_aplicaciones_moviles.domain.repository.AuthRepository
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -10,7 +12,9 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class AuthViewModel : ViewModel() {
+class AuthViewModel(
+    private val repository: AuthRepository // Conexión a AWS inyectada
+) : ViewModel() {
 
     private val _state = MutableStateFlow(AuthState())
     val state: StateFlow<AuthState> = _state.asStateFlow()
@@ -23,34 +27,46 @@ class AuthViewModel : ViewModel() {
         return password.length >= 8
     }
 
+    fun clearError() {
+        _state.update { it.copy(errorMessage = null) }
+    }
+
+    // --- LOGIN (Validación Híbrida conectada a AWS) ---
     fun loginUser(email: String, password: String, onNavigateToHome: () -> Unit) {
         if (!validateEmail(email)) {
             _state.update { it.copy(errorMessage = "El correo electrónico no es válido.") }
             return
         }
-
         if (!validatePassword(password)) {
             _state.update { it.copy(errorMessage = "La contraseña debe tener al menos 8 caracteres.") }
             return
         }
 
         viewModelScope.launch {
+            // Mostramos la ruedita de carga
             _state.update { it.copy(isLoading = true, errorMessage = null) }
-            delay(2000)
-            _state.update { it.copy(isLoading = false, isSuccess = true) }
-            onNavigateToHome()
+
+            // ¡Vamos a AWS a preguntar si el correo existe!
+            val emailExiste = repository.verifyEmailExists(email)
+
+            if (emailExiste) {
+                // ¡Éxito! El correo está en la base de datos
+                _state.update { it.copy(isLoading = false, isSuccess = true) }
+                onNavigateToHome()
+            } else {
+                // El correo no existe en AWS
+                _state.update { it.copy(isLoading = false, errorMessage = "Credenciales incorrectas o usuario no registrado.") }
+            }
         }
     }
 
-    fun clearError() {
-        _state.update { it.copy(errorMessage = null) }
-    }
 
-    // Función para simular el registro de un nuevo usuario
+    // --- REGISTRO (Conectado a AWS DynamoDB) ---
     fun registerUser(
         fullName: String,
         email: String,
         password: String,
+        roleId: Int, // ¡NUEVO! Recibimos el número de la tarjeta (1 o 2)
         termsAccepted: Boolean,
         onNavigateToLogin: () -> Unit
     ) {
@@ -58,30 +74,46 @@ class AuthViewModel : ViewModel() {
             _state.update { it.copy(errorMessage = "El nombre no puede estar vacío.") }
             return
         }
-
         if (!validateEmail(email)) {
             _state.update { it.copy(errorMessage = "El correo electrónico no es válido.") }
             return
         }
-
         if (!validatePassword(password)) {
             _state.update { it.copy(errorMessage = "La contraseña debe tener al menos 8 caracteres.") }
             return
         }
-
         if (!termsAccepted) {
             _state.update { it.copy(errorMessage = "Debes aceptar los Términos de Servicio para continuar.") }
             return
         }
 
-        // Si todo está correcto, simulamos la creación de la cuenta en el servidor
         viewModelScope.launch {
             _state.update { it.copy(isLoading = true, errorMessage = null) }
 
-            delay(2000) // Simula la espera de 2 segundos de internet
+            val partesDelNombre = fullName.trim().split(" ", limit = 2)
+            val nombres = partesDelNombre.getOrNull(0) ?: ""
+            val apellidos = partesDelNombre.getOrNull(1) ?: ""
 
-            _state.update { it.copy(isLoading = false, isSuccess = true) }
-            onNavigateToLogin() // Lo mandamos de regreso al Login para que inicie sesión
+            // ¡LA MAGIA ESTÁ AQUÍ!
+            // Si roleId es 1, es candidato. Si es 2, es reclutador.
+            val rolElegido = if (roleId == 1) "candidato" else "reclutador"
+
+            val request = UserRequestDto(
+                nombres = nombres,
+                apellidos = apellidos,
+                correo = email,
+                telefono = "+51000000000",
+                roles = listOf(rolElegido) // Enviamos el rol dinámico a AWS
+            )
+
+            val guardadoExitoso = repository.registerCandidate(request)
+
+            if (guardadoExitoso) {
+                _state.update { it.copy(isLoading = false, isSuccess = true) }
+                onNavigateToLogin()
+            } else {
+                _state.update { it.copy(isLoading = false, errorMessage = "Error de conexión con el servidor. Inténtalo de nuevo.") }
+            }
         }
     }
 }
