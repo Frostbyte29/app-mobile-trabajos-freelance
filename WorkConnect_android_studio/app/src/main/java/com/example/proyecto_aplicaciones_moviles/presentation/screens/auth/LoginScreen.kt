@@ -18,8 +18,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-// 1. Nueva importación del ViewModel nativo de Jetpack Compose
 import androidx.lifecycle.viewmodel.compose.viewModel
+
+// 1. IMPORTACIÓN NUEVA: Traemos tu fábrica de dependencias
+import com.example.proyecto_aplicaciones_moviles.di.AppContainer
+
 import com.example.proyecto_aplicaciones_moviles.presentation.components.WorkConnectButton
 import com.example.proyecto_aplicaciones_moviles.presentation.components.WorkConnectTextField
 
@@ -27,8 +30,8 @@ import com.example.proyecto_aplicaciones_moviles.presentation.components.WorkCon
 fun LoginScreen(
     onNavigateToRegister: () -> Unit,
     onLoginSuccess: () -> Unit,
-    // 2. Usamos viewModel() en lugar de hiltViewModel()
-    viewModel: AuthViewModel = viewModel()
+    // 2. CAMBIO CLAVE: Usamos la fábrica para inyectarle la conexión de AWS al ViewModel
+    viewModel: AuthViewModel = viewModel(factory = AppContainer.SharedViewModelFactory)
 ) {
     // Estados locales para los campos de texto
     var email by remember { mutableStateOf("") }

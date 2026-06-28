@@ -14,4 +14,11 @@ interface WorkConnectApi {
     @POST("projects")
     suspend fun createProject(@Body request: ProjectRequestDto): Response<Any>
     // Usamos Response<Any> para que solo nos importe si fue exitoso (Código 200) y no se confunda con el JSON de respuesta.
+    // Nota: Revisa en Postman si la ruta exacta es "users", "usuarios" o "usuarios/candidato" y cámbiala aquí si es necesario
+    @POST("usuarios")
+    suspend fun registerCandidate(@Body request: UserRequestDto): Response<Any>
+
+    // ¡NUEVO! Traer todos los usuarios para validar el Login
+    @GET("usuarios")
+    suspend fun getUsers(): Response<UserListResponseWrapper>
 }
