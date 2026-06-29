@@ -19,6 +19,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.proyecto_aplicaciones_moviles.core.utils.SessionManager
 
 // 1. IMPORTACIÓN NUEVA: Traemos tu fábrica de dependencias
 import com.example.proyecto_aplicaciones_moviles.di.AppContainer
@@ -161,6 +162,7 @@ fun LoginScreen(
                 onClick = {
                     // Llamamos a la lógica del ViewModel
                     viewModel.loginUser(email, password) {
+                        SessionManager.login(email)
                         onLoginSuccess()
                     }
                 }
@@ -210,7 +212,7 @@ fun LoginScreen(
 
         // TEXTO INFERIOR PARA REGISTRARSE
         Row(
-            modifier = Modifier.fillMaxWidth().padding(bottom = 32.dp),
+            modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.Center
         ) {
             Text(text = "¿No tiene una cuenta? ", color = Color.Gray)
@@ -221,5 +223,26 @@ fun LoginScreen(
                 modifier = Modifier.clickable { onNavigateToRegister() }
             )
         }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // ¡NUEVO! BOTÓN DE INVITADO
+        TextButton(
+            onClick = {
+                // Al hacer clic, lo mandamos directo al Home sin validar nada en AWS
+                SessionManager.logout()
+                onLoginSuccess()
+            }
+        ) {
+            Text(
+                text = "Continuar como invitado",
+                color = Color.Gray,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Medium
+            )
+        }
+
+        Spacer(modifier = Modifier.height(32.dp))
+
     }
 }

@@ -26,7 +26,9 @@ import com.example.proyecto_aplicaciones_moviles.presentation.screens.publish.Pu
 
 
 @Composable
-fun MainScreen() {
+fun MainScreen(
+    onNavigateToLogin: () -> Unit
+) {
     val bottomNavController = rememberNavController()
 
     // 3. NUEVO: Creamos el "Cerebro" compartido que guardará los proyectos en memoria
@@ -45,7 +47,8 @@ fun MainScreen() {
         ) {
             composable(BottomNavItem.Inicio.route) {
                 // 4. Conectamos la pantalla de inicio al cerebro
-                HomeScreen(viewModel = sharedViewModel)
+                HomeScreen(viewModel = sharedViewModel,
+                    onNavigateToLogin=onNavigateToLogin)
             }
             composable(BottomNavItem.Explorar.route) {
                 ExploreScreen()
