@@ -24,22 +24,32 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.proyecto_aplicaciones_moviles.core.utils.SessionManager
+import com.example.proyecto_aplicaciones_moviles.presentation.components.GuestPromptDialog
 import com.example.proyecto_aplicaciones_moviles.presentation.main.SharedProjectViewModel
-// Solo una importación de tu ViewModel correcto
-
 
 @Composable
 fun HomeScreen(
-    viewModel: SharedProjectViewModel
+    viewModel: SharedProjectViewModel,
+    onNavigateToLogin: () -> Unit // 1. Recibimos la ruta para mandar al usuario al Login
 ) {
-    // 1. Escuchamos los proyectos y el estado de carga que vienen de AWS
     val projects by viewModel.projects.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
+
+    // 2. EL INTERRUPTOR DEL DIÁLOGO DE INVITADO
+    var showGuestDialog by remember { mutableStateOf(false) }
 
     Scaffold(
         floatingActionButton = {
             FloatingActionButton(
-                onClick = { /* Acción para publicar algo rápido */ },
+                onClick = {
+                    // 3. ¡Protegemos el botón de crear proyecto!
+                    if (SessionManager.isGuest) {
+                        showGuestDialog = true
+                    } else {
+                        /* Acción real para ir a la pantalla de publicar */
+                    }
+                },
                 containerColor = Color(0xFF1A365D),
                 contentColor = Color.White,
                 shape = RoundedCornerShape(12.dp)
@@ -59,7 +69,7 @@ fun HomeScreen(
         ) {
             item { Spacer(modifier = Modifier.height(16.dp)) }
 
-            // 1. BARRA SUPERIOR (TOP BAR)
+            // 1. BARRA SUPERIOR
             item {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -138,9 +148,8 @@ fun HomeScreen(
                 }
             }
 
-            // 5. LISTA DE TARJETAS (Conectada a AWS)
+            // 5. LISTA DE TARJETAS DE AWS
             if (isLoading) {
-                // Si está cargando, mostramos la ruedita de progreso centrada
                 item {
                     Box(
                         modifier = Modifier.fillMaxWidth().padding(32.dp),
@@ -150,23 +159,30 @@ fun HomeScreen(
                     }
                 }
             } else {
-                // Si ya cargó, mostramos las tarjetas mapeando los nuevos datos
                 items(projects) { project ->
                     ProjectCard(
                         title = project.title,
-                        price = "S/.${project.budget}", // Convertimos el número a formato moneda
+                        price = "S/.${project.budget}",
                         priceType = "Precio Fijo",
                         company = project.company,
                         timeAgo = "Reciente",
                         description = project.description,
-                        tags = listOf(project.category), // Ponemos la categoría como etiqueta
+                        tags = listOf(project.category),
                         badgeText = "Nuevo",
-                        isPrimaryAction = true
+                        isPrimaryAction = true,
+                        // 4. ¡LA ACCIÓN DESDE LA TARJETA!
+                        onApplyClick = {
+                            if (SessionManager.isGuest) {
+                                showGuestDialog = true
+                            } else {
+                                // Aquí irá la lógica de postularse real en el futuro
+                            }
+                        }
                     )
                 }
             }
 
-            // 6. TARJETA DE TALENTO DESTACADO
+            // 6. TARJETA DE TALENTO
             item {
                 TalentCard(
                     name = "Arturo Vance",
@@ -175,6 +191,7 @@ fun HomeScreen(
                 )
             }
 
+            // 7. TARJETA MANUAL
             item {
                 ProjectCard(
                     title = "Logo e Identidad de Marca",
@@ -184,16 +201,29 @@ fun HomeScreen(
                     timeAgo = "",
                     description = "Crear una identidad de marca minimalista para una startup de moda sostenible,...",
                     tags = listOf("Branding", "Diseño de Logo"),
-                    isPrimaryAction = false
+                    isPrimaryAction = false,
+                    onApplyClick = {
+                        if (SessionManager.isGuest) showGuestDialog = true
+                    }
                 )
             }
 
-            item { Spacer(modifier = Modifier.height(80.dp)) } // Espacio al final para el BottomBar
+            item { Spacer(modifier = Modifier.height(80.dp)) }
         }
+
+        // 5. EL DIÁLOGO DE INVITADO (Aparecerá por encima de todo)
+        GuestPromptDialog(
+            showDialog = showGuestDialog,
+            onDismiss = { showGuestDialog = false },
+            onNavigateToLogin = {
+                showGuestDialog = false
+                onNavigateToLogin()
+            }
+        )
     }
 }
 
-// --- COMPONENTES REUTILIZABLES DE LA PANTALLA ---
+// --- COMPONENTES REUTILIZABLES ---
 
 @Composable
 fun FilterChipCustom(text: String, isSelected: Boolean) {
@@ -216,7 +246,8 @@ fun FilterChipCustom(text: String, isSelected: Boolean) {
 @Composable
 fun ProjectCard(
     title: String, price: String, priceType: String, company: String, timeAgo: String,
-    description: String, tags: List<String>, badgeText: String? = null, isPrimaryAction: Boolean
+    description: String, tags: List<String>, badgeText: String? = null, isPrimaryAction: Boolean,
+    onApplyClick: () -> Unit // 6. NUEVO PARÁMETRO: Le enseñamos a la tarjeta a recibir el clic
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -225,7 +256,6 @@ fun ProjectCard(
         border = BorderStroke(1.dp, Color(0xFFE5E7EB))
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
-            // Etiqueta superior opcional
             if (badgeText != null) {
                 Surface(
                     shape = RoundedCornerShape(12.dp),
@@ -242,7 +272,6 @@ fun ProjectCard(
                 }
             }
 
-            // Título y Precio
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                 Text(
                     text = title,
@@ -260,25 +289,15 @@ fun ProjectCard(
             }
 
             Spacer(modifier = Modifier.height(4.dp))
-
-            // Subtítulo (Empresa y tiempo)
             val subText = if (timeAgo.isNotEmpty()) "$company • $timeAgo" else company
             Text(text = subText, fontSize = 12.sp, color = Color.Gray)
-
             Spacer(modifier = Modifier.height(12.dp))
-
-            // Descripción
             Text(text = description, fontSize = 13.sp, color = Color.DarkGray, lineHeight = 18.sp)
-
             Spacer(modifier = Modifier.height(12.dp))
 
-            // Etiquetas (Tags)
             LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 items(tags.size) { index ->
-                    Surface(
-                        shape = RoundedCornerShape(8.dp),
-                        color = Color(0xFFF3F4F6)
-                    ) {
+                    Surface(shape = RoundedCornerShape(8.dp), color = Color(0xFFF3F4F6)) {
                         Text(
                             text = tags[index],
                             fontSize = 11.sp,
@@ -291,14 +310,11 @@ fun ProjectCard(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Botón de Acción
             Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                 if (isPrimaryAction) {
                     Button(
-                        onClick = { },
-                        modifier = Modifier
-                            .weight(1f)
-                            .height(40.dp),
+                        onClick = onApplyClick, // 7. LO CONECTAMOS AL BOTÓN DE POSTULARSE
+                        modifier = Modifier.weight(1f).height(40.dp),
                         shape = RoundedCornerShape(8.dp),
                         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF294485))
                     ) {
@@ -314,10 +330,8 @@ fun ProjectCard(
                     }
                 } else {
                     OutlinedButton(
-                        onClick = { },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(40.dp),
+                        onClick = onApplyClick, // TAMBIÉN LO CONECTAMOS AQUÍ
+                        modifier = Modifier.fillMaxWidth().height(40.dp),
                         shape = RoundedCornerShape(8.dp),
                         border = BorderStroke(1.dp, Color(0xFF294485))
                     ) {
@@ -328,6 +342,7 @@ fun ProjectCard(
         }
     }
 }
+
 
 @Composable
 fun TalentCard(name: String, role: String, description: String) {

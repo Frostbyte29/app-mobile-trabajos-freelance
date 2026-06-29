@@ -78,7 +78,15 @@ fun RootNavGraph(navController: NavHostController){
 
         // 3. MÓDULO PRINCIPAL (HOME)
         composable(route = AppRoute.MainScreen.route) {
-            MainScreen()
+            MainScreen(
+                onNavigateToLogin = {
+                    // Cuando el invitado toque "Iniciar Sesión" en el Home,
+                    // lo mandamos a la ruta del Login y destruimos el MainScreen del historial
+                    navController.navigate(AppRoute.Login.route) {
+                        popUpTo(AppRoute.MainScreen.route) { inclusive = true }
+                    }
+                }
+            )
         }
     }
 }
