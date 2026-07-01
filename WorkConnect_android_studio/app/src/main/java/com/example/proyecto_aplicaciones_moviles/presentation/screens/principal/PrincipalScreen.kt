@@ -1,4 +1,4 @@
-package com.example.proyecto_aplicaciones_moviles.presentation.screens.main
+package com.example.proyecto_aplicaciones_moviles.presentation.screens.principal
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -17,22 +17,22 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.proyecto_aplicaciones_moviles.di.AppContainer
 import com.example.proyecto_aplicaciones_moviles.presentation.main.SharedProjectViewModel
-import com.example.proyecto_aplicaciones_moviles.presentation.screens.explore.ExploreScreen
-import com.example.proyecto_aplicaciones_moviles.presentation.screens.home.HomeScreen
-import com.example.proyecto_aplicaciones_moviles.presentation.screens.main.components.BottomNavItem
-import com.example.proyecto_aplicaciones_moviles.presentation.screens.main.components.WorkConnectBottomBar
+import com.example.proyecto_aplicaciones_moviles.presentation.screens.explorar.ExplorarScreen
+import com.example.proyecto_aplicaciones_moviles.presentation.screens.inicio.InicioScreen
+import com.example.proyecto_aplicaciones_moviles.presentation.screens.principal.components.BottomNavItem
+import com.example.proyecto_aplicaciones_moviles.presentation.screens.principal.components.WorkConnectBottomBar
 // 2. Importamos la pantalla de publicar que vas a crear
-import com.example.proyecto_aplicaciones_moviles.presentation.screens.publish.PublishScreen
+import com.example.proyecto_aplicaciones_moviles.presentation.screens.publicar.PublicarScreen
 
 
 @Composable
-fun MainScreen(
+fun PrincipalScreen(
     onNavigateToLogin: () -> Unit
 ) {
     val bottomNavController = rememberNavController()
 
     // 3. NUEVO: Creamos el "Cerebro" compartido que guardará los proyectos en memoria
-    val sharedViewModel: SharedProjectViewModel = viewModel(factory = AppContainer.SharedViewModelFactory)
+    val sharedViewModel: SharedProjectViewModel = viewModel(factory = AppContainer.CompartirViewModelFactory)
 
     Scaffold(
         bottomBar = {
@@ -47,20 +47,20 @@ fun MainScreen(
         ) {
             composable(BottomNavItem.Inicio.route) {
                 // 4. Conectamos la pantalla de inicio al cerebro
-                HomeScreen(viewModel = sharedViewModel,
+                InicioScreen(viewModel = sharedViewModel,
                     onNavigateToLogin=onNavigateToLogin)
             }
             composable(BottomNavItem.Explorar.route) {
-                ExploreScreen()
+                ExplorarScreen()
             }
             composable(BottomNavItem.Publicar.route) {
-                PublishScreen(viewModel = sharedViewModel)
+                PublicarScreen(viewModel = sharedViewModel)
             }
             composable(BottomNavItem.Mensajes.route) {
-                PlaceholderScreen("Bandeja de Mensajes")
+                MarcadorPosicionScreen("Bandeja de Mensajes")
             }
             composable(BottomNavItem.Perfil.route) {
-                PlaceholderScreen("Mi Perfil")
+                MarcadorPosicionScreen("Mi Perfil")
             }
         }
     }
@@ -68,7 +68,7 @@ fun MainScreen(
 
 // Un componente temporal para mostrar texto centrado en cada pestaña
 @Composable
-fun PlaceholderScreen(texto: String) {
+fun MarcadorPosicionScreen(texto: String) {
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         Text(text = texto, fontSize = 20.sp, fontWeight = FontWeight.Bold)
     }

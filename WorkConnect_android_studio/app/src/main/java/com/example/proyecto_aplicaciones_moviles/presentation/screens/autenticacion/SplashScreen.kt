@@ -1,4 +1,4 @@
-package com.example.proyecto_aplicaciones_moviles.presentation.screens.auth
+package com.example.proyecto_aplicaciones_moviles.presentation.screens.autenticacion
 
 
 import androidx.compose.foundation.BorderStroke

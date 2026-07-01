@@ -1,23 +1,22 @@
-package com.example.proyecto_aplicaciones_moviles.presentation.screens.auth
+package com.example.proyecto_aplicaciones_moviles.presentation.screens.autenticacion
 
 import android.util.Patterns
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.proyecto_aplicaciones_moviles.data.remote.UserRequestDto
-import com.example.proyecto_aplicaciones_moviles.domain.repository.AuthRepository
-import kotlinx.coroutines.delay
+import com.example.proyecto_aplicaciones_moviles.data.remote.UsuarioRequestDto
+import com.example.proyecto_aplicaciones_moviles.domain.repository.AutenticacionRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
-class AuthViewModel(
-    private val repository: AuthRepository // Conexión a AWS inyectada
+class AutenticacionViewModel(
+    private val repository: AutenticacionRepository // Conexión a AWS inyectada
 ) : ViewModel() {
 
-    private val _state = MutableStateFlow(AuthState())
-    val state: StateFlow<AuthState> = _state.asStateFlow()
+    private val _state = MutableStateFlow(AutenticacionState())
+    val state: StateFlow<AutenticacionState> = _state.asStateFlow()
 
     fun validateEmail(email: String): Boolean {
         return email.isNotBlank() && Patterns.EMAIL_ADDRESS.matcher(email).matches()
@@ -32,7 +31,7 @@ class AuthViewModel(
     }
 
     // --- LOGIN (Validación Híbrida conectada a AWS) ---
-    fun loginUser(email: String, password: String, onNavigateToHome: () -> Unit) {
+    fun LoginUsuario(email: String, password: String, onNavigateToHome: () -> Unit) {
         if (!validateEmail(email)) {
             _state.update { it.copy(errorMessage = "El correo electrónico no es válido.") }
             return
@@ -47,7 +46,7 @@ class AuthViewModel(
             _state.update { it.copy(isLoading = true, errorMessage = null) }
 
             // ¡Vamos a AWS a preguntar si el correo existe!
-            val emailExiste = repository.verifyEmailExists(email)
+            val emailExiste = repository.verificarEmail(email)
 
             if (emailExiste) {
                 // ¡Éxito! El correo está en la base de datos
@@ -62,7 +61,7 @@ class AuthViewModel(
 
 
     // --- REGISTRO (Conectado a AWS DynamoDB) ---
-    fun registerUser(
+    fun RegistrarUsuario(
         fullName: String,
         email: String,
         password: String,
@@ -98,7 +97,7 @@ class AuthViewModel(
             // Si roleId es 1, es candidato. Si es 2, es reclutador.
             val rolElegido = if (roleId == 1) "candidato" else "reclutador"
 
-            val request = UserRequestDto(
+            val request = UsuarioRequestDto(
                 nombres = nombres,
                 apellidos = apellidos,
                 correo = email,
@@ -106,7 +105,7 @@ class AuthViewModel(
                 roles = listOf(rolElegido) // Enviamos el rol dinámico a AWS
             )
 
-            val guardadoExitoso = repository.registerCandidate(request)
+            val guardadoExitoso = repository.registrarCandidato(request)
 
             if (guardadoExitoso) {
                 _state.update { it.copy(isLoading = false, isSuccess = true) }

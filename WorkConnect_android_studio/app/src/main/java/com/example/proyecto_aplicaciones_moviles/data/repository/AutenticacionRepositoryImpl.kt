@@ -1,15 +1,15 @@
 package com.example.proyecto_aplicaciones_moviles.data.repository
 
 import android.util.Log
-import com.example.proyecto_aplicaciones_moviles.data.remote.UserRequestDto
+import com.example.proyecto_aplicaciones_moviles.data.remote.UsuarioRequestDto
 import com.example.proyecto_aplicaciones_moviles.data.remote.WorkConnectApi
-import com.example.proyecto_aplicaciones_moviles.domain.repository.AuthRepository
+import com.example.proyecto_aplicaciones_moviles.domain.repository.AutenticacionRepository
 
-class AuthRepositoryImpl(
+class AutenticacionRepositoryImpl(
     private val api: WorkConnectApi
-) : AuthRepository {
+) : AutenticacionRepository {
 
-    override suspend fun registerCandidate(request: UserRequestDto): Boolean {
+    override suspend fun registrarCandidato(request: UsuarioRequestDto): Boolean {
         return try {
             val response = api.registerCandidate(request)
             response.isSuccessful // Devuelve true si AWS responde exitosamente (Código 200-299)
@@ -19,7 +19,7 @@ class AuthRepositoryImpl(
         }
     }
 
-    override suspend fun verifyEmailExists(email: String): Boolean {
+    override suspend fun verificarEmail(email: String): Boolean {
         return try {
             val emailLimpio = email.trim().lowercase()
             android.util.Log.d("AWS_LOGIN", "Intentando buscar el correo: '$emailLimpio'")

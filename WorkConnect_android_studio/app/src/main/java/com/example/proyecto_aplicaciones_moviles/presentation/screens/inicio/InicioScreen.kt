@@ -1,4 +1,4 @@
-package com.example.proyecto_aplicaciones_moviles.presentation.screens.home
+package com.example.proyecto_aplicaciones_moviles.presentation.screens.inicio
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -29,7 +29,7 @@ import com.example.proyecto_aplicaciones_moviles.presentation.components.GuestPr
 import com.example.proyecto_aplicaciones_moviles.presentation.main.SharedProjectViewModel
 
 @Composable
-fun HomeScreen(
+fun InicioScreen(
     viewModel: SharedProjectViewModel,
     onNavigateToLogin: () -> Unit // 1. Recibimos la ruta para mandar al usuario al Login
 ) {
@@ -128,9 +128,9 @@ fun HomeScreen(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    item { FilterChipCustom(text = "Categoría", isSelected = true) }
-                    item { FilterChipCustom(text = "Presupuesto", isSelected = false) }
-                    item { FilterChipCustom(text = "Plazo", isSelected = false) }
+                    item { FiltradorCustom(text = "Categoría", isSelected = true) }
+                    item { FiltradorCustom(text = "Presupuesto", isSelected = false) }
+                    item { FiltradorCustom(text = "Plazo", isSelected = false) }
                 }
             }
 
@@ -160,7 +160,7 @@ fun HomeScreen(
                 }
             } else {
                 items(projects) { project ->
-                    ProjectCard(
+                    CartaProyecto(
                         title = project.title,
                         price = "S/.${project.budget}",
                         priceType = "Precio Fijo",
@@ -184,7 +184,7 @@ fun HomeScreen(
 
             // 6. TARJETA DE TALENTO
             item {
-                TalentCard(
+                CartaTalento(
                     name = "Arturo Vance",
                     role = "Arquitecto Full-Stack Senior",
                     description = "Más de 12 años de experiencia escalando plataformas SaaS. Experta en React, Go y arquitectura de nube AWS."
@@ -193,7 +193,7 @@ fun HomeScreen(
 
             // 7. TARJETA MANUAL
             item {
-                ProjectCard(
+                CartaProyecto(
                     title = "Logo e Identidad de Marca",
                     price = "S/.800",
                     priceType = "Precio Fijo",
@@ -226,7 +226,7 @@ fun HomeScreen(
 // --- COMPONENTES REUTILIZABLES ---
 
 @Composable
-fun FilterChipCustom(text: String, isSelected: Boolean) {
+fun FiltradorCustom(text: String, isSelected: Boolean) {
     Surface(
         shape = RoundedCornerShape(20.dp),
         color = if (isSelected) Color(0xFF294485) else Color(0xFFE9ECEF),
@@ -244,7 +244,7 @@ fun FilterChipCustom(text: String, isSelected: Boolean) {
 }
 
 @Composable
-fun ProjectCard(
+fun CartaProyecto(
     title: String, price: String, priceType: String, company: String, timeAgo: String,
     description: String, tags: List<String>, badgeText: String? = null, isPrimaryAction: Boolean,
     onApplyClick: () -> Unit // 6. NUEVO PARÁMETRO: Le enseñamos a la tarjeta a recibir el clic
@@ -345,7 +345,7 @@ fun ProjectCard(
 
 
 @Composable
-fun TalentCard(name: String, role: String, description: String) {
+fun CartaTalento(name: String, role: String, description: String) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(12.dp),
