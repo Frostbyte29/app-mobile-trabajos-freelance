@@ -1,4 +1,4 @@
-package com.example.proyecto_aplicaciones_moviles.presentation.screens.auth
+package com.example.proyecto_aplicaciones_moviles.presentation.screens.autenticacion
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
@@ -32,7 +32,7 @@ fun LoginScreen(
     onNavigateToRegister: () -> Unit,
     onLoginSuccess: () -> Unit,
     // 2. CAMBIO CLAVE: Usamos la fábrica para inyectarle la conexión de AWS al ViewModel
-    viewModel: AuthViewModel = viewModel(factory = AppContainer.SharedViewModelFactory)
+    viewModel: AutenticacionViewModel = viewModel(factory = AppContainer.CompartirViewModelFactory)
 ) {
     // Estados locales para los campos de texto
     var email by remember { mutableStateOf("") }
@@ -161,7 +161,7 @@ fun LoginScreen(
                 text = "Iniciar Sesión",
                 onClick = {
                     // Llamamos a la lógica del ViewModel
-                    viewModel.loginUser(email, password) {
+                    viewModel.LoginUsuario(email, password) {
                         SessionManager.login(email)
                         onLoginSuccess()
                     }

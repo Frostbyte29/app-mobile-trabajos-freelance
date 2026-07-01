@@ -1,4 +1,4 @@
-package com.example.proyecto_aplicaciones_moviles.presentation.screens.explore
+package com.example.proyecto_aplicaciones_moviles.presentation.screens.explorar
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -34,7 +34,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 @Composable
-fun ExploreScreen() {
+fun ExplorarScreen() {
     // Datos de prueba para las categorías (Mock Data)
     val categories = listOf(
         ExploreCategory("Diseño y Creatividad", "Ilustradores, Diseñadores de Marca, Motion Artists", Icons.Filled.Brush),
@@ -139,14 +139,14 @@ fun ExploreScreen() {
 
         // 5. TARJETAS DE TENDENCIA (Banners grandes)
         item(span = { GridItemSpan(2) }) {
-            TrendCard(
+            CartaTendencia(
                 title = "Diseño UI/UX y de\nProducto",
                 subtitle = "Más de 3,420 vacantes activas",
                 badge = "Destacado esta semana"
             )
         }
         item(span = { GridItemSpan(2) }) {
-            TrendCard(
+            CartaTendencia(
                 title = "Ingeniería Full Stack",
                 subtitle = "Más de 1,890 vacantes activas"
             )
@@ -165,7 +165,7 @@ fun ExploreScreen() {
 
         // 7. CUADRÍCULA DE CATEGORÍAS (Span = 1, es decir, 2 columnas)
         items(categories) { category ->
-            CategoryGridCard(category = category)
+            CartaCategoria(category = category)
         }
 
         item(span = { GridItemSpan(2) }) { Spacer(modifier = Modifier.height(80.dp)) }
@@ -177,7 +177,7 @@ fun ExploreScreen() {
 data class ExploreCategory(val title: String, val description: String, val icon: ImageVector)
 
 @Composable
-fun TrendCard(title: String, subtitle: String, badge: String? = null) {
+fun CartaTendencia(title: String, subtitle: String, badge: String? = null) {
     // Usamos un Box con un degradado oscuro para simular la imagen de fondo que tienes en tu diseño
     Box(
         modifier = Modifier
@@ -219,7 +219,7 @@ fun TrendCard(title: String, subtitle: String, badge: String? = null) {
 }
 
 @Composable
-fun CategoryGridCard(category: ExploreCategory) {
+fun CartaCategoria(category: ExploreCategory) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = Color.White),

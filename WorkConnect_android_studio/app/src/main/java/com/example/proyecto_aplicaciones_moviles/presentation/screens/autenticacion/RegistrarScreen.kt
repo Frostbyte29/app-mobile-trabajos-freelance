@@ -1,4 +1,4 @@
-package com.example.proyecto_aplicaciones_moviles.presentation.screens.auth
+package com.example.proyecto_aplicaciones_moviles.presentation.screens.autenticacion
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
@@ -34,11 +34,11 @@ import com.example.proyecto_aplicaciones_moviles.presentation.components.WorkCon
 import com.example.proyecto_aplicaciones_moviles.presentation.components.WorkConnectTextField
 
 @Composable
-fun RegisterScreen(
+fun RegistrarScreen(
     onNavigateBack: () -> Unit,
     onRegisterSuccess: () -> Unit,
     // Inyectamos el ViewModel usando la fábrica que creamos
-    viewModel: AuthViewModel = viewModel(factory = AppContainer.SharedViewModelFactory)
+    viewModel: AutenticacionViewModel = viewModel(factory = AppContainer.CompartirViewModelFactory)
 ) {
     // Estados de los campos de texto
     var fullName by remember { mutableStateOf("") }
@@ -102,7 +102,7 @@ fun RegisterScreen(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            RoleCard(
+            CartaRol(
                 modifier = Modifier.weight(1f),
                 title = "Quiero trabajar",
                 description = "Soy un freelancer buscando proyectos.",
@@ -110,7 +110,7 @@ fun RegisterScreen(
                 isSelected = selectedRole == 1,
                 onClick = { selectedRole = 1 }
             )
-            RoleCard(
+            CartaRol(
                 modifier = Modifier.weight(1f),
                 title = "Quiero contratar",
                 description = "Busco contratar al mejor talento.",
@@ -210,7 +210,7 @@ fun RegisterScreen(
             WorkConnectButton(
                 text = "Crear Cuenta ->",
                 onClick = {
-                    viewModel.registerUser(
+                    viewModel.RegistrarUsuario(
                         fullName = fullName,
                         email = email,
                         password = password,
@@ -282,7 +282,7 @@ fun RegisterScreen(
 
 // COMPONENTE LOCAL PARA LAS TARJETAS DE ROL
 @Composable
-fun RoleCard(
+fun CartaRol(
     modifier: Modifier = Modifier,
     title: String,
     description: String,

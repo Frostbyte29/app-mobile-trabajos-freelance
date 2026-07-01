@@ -5,10 +5,10 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
-import com.example.proyecto_aplicaciones_moviles.presentation.screens.auth.LoginScreen
-import com.example.proyecto_aplicaciones_moviles.presentation.screens.auth.RegisterScreen
-import com.example.proyecto_aplicaciones_moviles.presentation.screens.auth.SplashScreen
-import com.example.proyecto_aplicaciones_moviles.presentation.screens.main.MainScreen
+import com.example.proyecto_aplicaciones_moviles.presentation.screens.autenticacion.LoginScreen
+import com.example.proyecto_aplicaciones_moviles.presentation.screens.autenticacion.RegistrarScreen
+import com.example.proyecto_aplicaciones_moviles.presentation.screens.autenticacion.SplashScreen
+import com.example.proyecto_aplicaciones_moviles.presentation.screens.principal.PrincipalScreen
 
 @Composable
 fun RootNavGraph(navController: NavHostController){
@@ -59,7 +59,7 @@ fun RootNavGraph(navController: NavHostController){
 
             // REGISTRO
             composable(route = AppRoute.Register.route) {
-                RegisterScreen(
+                RegistrarScreen(
                     onNavigateBack = {
                         // Si se arrepiente, vuelve al Splash de forma natural
                         navController.popBackStack()
@@ -78,7 +78,7 @@ fun RootNavGraph(navController: NavHostController){
 
         // 3. MÓDULO PRINCIPAL (HOME)
         composable(route = AppRoute.MainScreen.route) {
-            MainScreen(
+            PrincipalScreen(
                 onNavigateToLogin = {
                     // Cuando el invitado toque "Iniciar Sesión" en el Home,
                     // lo mandamos a la ruta del Login y destruimos el MainScreen del historial

@@ -1,4 +1,4 @@
-package com.example.proyecto_aplicaciones_moviles.presentation.screens.publish
+package com.example.proyecto_aplicaciones_moviles.presentation.screens.publicar
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -15,11 +15,10 @@ import androidx.compose.ui.unit.sp
 import com.example.proyecto_aplicaciones_moviles.presentation.components.WorkConnectButton
 import com.example.proyecto_aplicaciones_moviles.presentation.components.WorkConnectTextField
 import com.example.proyecto_aplicaciones_moviles.presentation.main.SharedProjectViewModel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 @Composable
-fun PublishScreen(
+fun PublicarScreen(
     viewModel: SharedProjectViewModel // Recibe el ViewModel compartido
 ) {
     var title by remember { mutableStateOf("") }

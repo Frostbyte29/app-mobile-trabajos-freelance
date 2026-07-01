@@ -1,7 +1,7 @@
 package com.example.proyecto_aplicaciones_moviles.domain.model
 
 // Este es el modelo puro que usará la interfaz gráfica
-data class Project(
+data class Proyecto(
     val id: String = "",
     val title: String,
     val description: String,

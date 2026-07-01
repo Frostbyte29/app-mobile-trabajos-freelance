@@ -2,16 +2,16 @@ package com.example.proyecto_aplicaciones_moviles.data.repository
 
 import com.example.proyecto_aplicaciones_moviles.data.remote.WorkConnectApi
 import com.example.proyecto_aplicaciones_moviles.data.remote.toDomain
-import com.example.proyecto_aplicaciones_moviles.domain.model.Project
-import com.example.proyecto_aplicaciones_moviles.domain.repository.ProjectRepository
+import com.example.proyecto_aplicaciones_moviles.domain.model.Proyecto
+import com.example.proyecto_aplicaciones_moviles.domain.repository.ProyectoRepository
 import android.util.Log
-import com.example.proyecto_aplicaciones_moviles.data.remote.ProjectRequestDto
+import com.example.proyecto_aplicaciones_moviles.data.remote.ProyectoRequestDto
 
-class ProjectRepositoryImpl(
+class ProyectoRepositoryImpl(
     private val api: WorkConnectApi
-) : ProjectRepository {
+) : ProyectoRepository {
 
-    override suspend fun getProjects(): List<Project> {
+    override suspend fun getProyectos(): List<Proyecto> {
         return try {
             val response = api.getProjects()
 
@@ -28,7 +28,7 @@ class ProjectRepositoryImpl(
         }
     }
 
-    override suspend fun createProject(request: ProjectRequestDto): Boolean {
+    override suspend fun crearPoyectos(request: ProyectoRequestDto): Boolean {
         return try {
             val response = api.createProject(request)
             response.isSuccessful // Devolverá true si AWS lo guardó correctamente
