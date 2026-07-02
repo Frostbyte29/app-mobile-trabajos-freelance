@@ -6,6 +6,10 @@ sealed class AppRoute(val route: String) {
     object Login: AppRoute("login_screen")
     object Register: AppRoute("register_screen")
     object MainScreen: AppRoute("main_screen")
+    object ProjectDetail: AppRoute("project_detail/{projectId}") {
+        fun createRoute(projectId: String) = "project_detail/$projectId"
+    }
+    object Notificaciones: AppRoute("notificaciones_screen")
 }
 
 sealed class BottomNavRoute(val route: String){

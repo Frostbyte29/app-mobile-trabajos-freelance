@@ -160,8 +160,7 @@ fun LoginScreen(
             WorkConnectButton(
                 text = "Iniciar Sesión",
                 onClick = {
-                    // Llamamos a la lógica del ViewModel
-                    viewModel.loginUser(email, password) {
+                    viewModel.iniciarSesion(email, password) {
                         SessionManager.login(email)
                         onLoginSuccess()
                     }
@@ -169,7 +168,25 @@ fun LoginScreen(
             )
         }
 
-        Spacer(modifier = Modifier.height(32.dp))
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // BOTÓN DE INVITADO — visible sin necesidad de scroll
+        TextButton(
+            onClick = {
+                SessionManager.logout() // asegura que no quede sesión activa
+                onLoginSuccess()
+            },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text(
+                text = "Continuar como invitado",
+                color = Color.Gray,
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Medium
+            )
+        }
+
+        Spacer(modifier = Modifier.height(24.dp))
 
         // DIVISOR "O CONTINUAR CON"
         Row(
@@ -188,7 +205,7 @@ fun LoginScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // BOTÓN ÚNICO DE GOOGLE
+        // BOTÓN DE GOOGLE
         OutlinedButton(
             onClick = { },
             modifier = Modifier
@@ -221,24 +238,6 @@ fun LoginScreen(
                 color = Color(0xFF1A365D),
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.clickable { onNavigateToRegister() }
-            )
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // ¡NUEVO! BOTÓN DE INVITADO
-        TextButton(
-            onClick = {
-                // Al hacer clic, lo mandamos directo al Home sin validar nada en AWS
-                SessionManager.logout()
-                onLoginSuccess()
-            }
-        ) {
-            Text(
-                text = "Continuar como invitado",
-                color = Color.Gray,
-                fontSize = 14.sp,
-                fontWeight = FontWeight.Medium
             )
         }
 

@@ -32,6 +32,9 @@ export const badRequest = (error) =>
 export const notFound = (message = "Resource not found") =>
   buildResponse(404, { message });
 
+export const conflict = (error) =>
+  buildResponse(409, formatError(error));
+
 export const internalError = (message = "Internal Server Error") =>
   buildResponse(500, { message });
 
