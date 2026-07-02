@@ -210,7 +210,7 @@ fun RegisterScreen(
             WorkConnectButton(
                 text = "Crear Cuenta ->",
                 onClick = {
-                    viewModel.registerUser(
+                    viewModel.registrarUsuario(
                         fullName = fullName,
                         email = email,
                         password = password,

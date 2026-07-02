@@ -2,15 +2,14 @@ package com.example.proyecto_aplicaciones_moviles.presentation.screens.home
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.BookmarkBorder
 import androidx.compose.material.icons.filled.NotificationsNone
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
@@ -24,213 +23,317 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.proyecto_aplicaciones_moviles.core.utils.SessionManager
 import com.example.proyecto_aplicaciones_moviles.presentation.components.GuestPromptDialog
 import com.example.proyecto_aplicaciones_moviles.presentation.main.SharedProjectViewModel
-
+import com.example.proyecto_aplicaciones_moviles.presentation.screens.activity.MyActivityViewModel
 @Composable
 fun HomeScreen(
     viewModel: SharedProjectViewModel,
-    onNavigateToLogin: () -> Unit // 1. Recibimos la ruta para mandar al usuario al Login
+    activityViewModel: MyActivityViewModel,
+    onNavigateToLogin: () -> Unit,
+    onNavigateToDetail: (String) -> Unit = {},
+    onNavigateToNotificaciones: () -> Unit = {}
 ) {
     val projects by viewModel.projects.collectAsState()
     val isLoading by viewModel.isLoading.collectAsState()
+    val categorias by viewModel.categorias.collectAsState()
+    val filtroActivo by viewModel.filtroCategoria.collectAsState()
+    val activityState by activityViewModel.state.collectAsState()
 
-    // 2. EL INTERRUPTOR DEL DIÁLOGO DE INVITADO
+    // Refrescamos el filtro cuando HomeScreen se vuelve visible
+    // y también si el rol activo cambia (usuario cambia perfil en Perfil)
+    val rolActivo = SessionManager.activeRole
+    LaunchedEffect(rolActivo) {
+        viewModel.refrescarFiltro()
+    }
+
     var showGuestDialog by remember { mutableStateOf(false) }
+    // Proyecto seleccionado — abre el diálogo de confirmación de postulación
+    var proyectoParaPostular by remember { mutableStateOf<com.example.proyecto_aplicaciones_moviles.domain.model.Project?>(null) }
+    var mensajePostulacion by remember { mutableStateOf("") }
+
+    // Limpia el banner de éxito tras 3 segundos
+    LaunchedEffect(activityState.postulacionExitosa) {
+        if (activityState.postulacionExitosa) {
+            kotlinx.coroutines.delay(3000)
+            activityViewModel.clearPostulacionExitosa()
+        }
+    }
 
     Scaffold(
         floatingActionButton = {
             FloatingActionButton(
                 onClick = {
-                    // 3. ¡Protegemos el botón de crear proyecto!
-                    if (SessionManager.isGuest) {
-                        showGuestDialog = true
-                    } else {
-                        /* Acción real para ir a la pantalla de publicar */
-                    }
+                    if (SessionManager.isGuest) showGuestDialog = true
+                    // El FAB se puede conectar a la tab de Publicar en el futuro
                 },
                 containerColor = Color(0xFF1A365D),
                 contentColor = Color.White,
                 shape = RoundedCornerShape(12.dp)
             ) {
-                Icon(imageVector = Icons.Filled.Add, contentDescription = "Agregar")
+                Icon(Icons.Filled.Add, "Agregar")
             }
         },
         containerColor = Color(0xFFF8F9FA)
     ) { paddingValues ->
 
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .padding(horizontal = 20.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            item { Spacer(modifier = Modifier.height(16.dp)) }
+        // Box necesario para poder superponer el banner de éxito sobre la lista
+        Box(modifier = Modifier.fillMaxSize()) {
 
-            // 1. BARRA SUPERIOR
-            item {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Box(
-                            modifier = Modifier
-                                .size(40.dp)
-                                .clip(CircleShape)
-                                .background(Color.LightGray),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Icon(imageVector = Icons.Filled.Person, contentDescription = "Avatar", tint = Color.White)
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues)
+                    .padding(horizontal = 20.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                item { Spacer(modifier = Modifier.height(16.dp)) }
+
+                // 1. BARRA SUPERIOR
+                item {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Box(
+                                modifier = Modifier
+                                    .size(40.dp)
+                                    .clip(CircleShape)
+                                    .background(Color.LightGray),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(Icons.Filled.Person, "Avatar", tint = Color.White)
+                            }
+                            Spacer(modifier = Modifier.width(12.dp))
+                            Text(
+                                "WorkConnect",
+                                fontSize = 22.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color(0xFF1A365D)
+                            )
                         }
-                        Spacer(modifier = Modifier.width(12.dp))
-                        Text(
-                            text = "WorkConnect",
-                            fontSize = 22.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = Color(0xFF1A365D)
-                        )
-                    }
-                    IconButton(onClick = { /* Notificaciones */ }) {
-                        Icon(imageVector = Icons.Filled.NotificationsNone, contentDescription = "Notificaciones")
+                        IconButton(onClick = { onNavigateToNotificaciones() }) {
+                            Icon(Icons.Filled.NotificationsNone, "Notificaciones")
+                        }
                     }
                 }
+
+                // 2. BUSCADOR
+                item {
+                    OutlinedTextField(
+                        value = "",
+                        onValueChange = {},
+                        modifier = Modifier.fillMaxWidth(),
+                        placeholder = { Text("Buscar proyectos, habilidades o clientes...", color = Color.Gray, fontSize = 14.sp) },
+                        leadingIcon = { Icon(Icons.Filled.Search, "Buscar", tint = Color.Gray) },
+                        shape = RoundedCornerShape(12.dp),
+                        colors = OutlinedTextFieldDefaults.colors(
+                            unfocusedContainerColor = Color.White,
+                            focusedContainerColor = Color.White,
+                            unfocusedBorderColor = Color.LightGray
+                        ),
+                        singleLine = true
+                    )
+                }
+
+                // 3. CHIPS DE FILTRO — funcionales con categorías de AWS
+                item {
+                    LazyRow(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        item {
+                            FilterChipCustom(
+                                text = "Todos",
+                                isSelected = filtroActivo == "Todos",
+                                onClick = { viewModel.establecerFiltroCategoria("Todos") }
+                            )
+                        }
+                        items(categorias) { categoria ->
+                            FilterChipCustom(
+                                text = categoria,
+                                isSelected = filtroActivo == categoria,
+                                onClick = { viewModel.establecerFiltroCategoria(categoria) }
+                            )
+                        }
+                    }
+                }
+
+                // 4. TÍTULO DE SECCIÓN — adaptado al rol activo
+                item {
+                    val tituloSeccion = when (rolActivo) {
+                        "reclutador" -> "Freelancers disponibles"
+                        "candidato"  -> "Ofertas de trabajo"
+                        else         -> "Publicaciones recientes"
+                    }
+                    Row(
+                        modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(tituloSeccion, fontSize = 18.sp, fontWeight = FontWeight.Bold)
+                        Text("Ver todo", fontSize = 14.sp, color = Color(0xFF1A365D), fontWeight = FontWeight.Medium)
+                    }
+                }
+
+                // 5. LISTA DE PROYECTOS DE AWS
+                if (isLoading) {
+                    item {
+                        Box(Modifier.fillMaxWidth().padding(32.dp), Alignment.Center) {
+                            CircularProgressIndicator(color = Color(0xFF1A365D))
+                        }
+                    }
+                } else if (projects.isEmpty()) {
+                    item {
+                        Box(Modifier.fillMaxWidth().padding(32.dp), Alignment.Center) {
+                            Text("Aún no hay proyectos publicados.", fontSize = 14.sp, color = Color.Gray)
+                        }
+                    }
+                } else {
+                    items(projects) { project ->
+                        // Proyecto propio del reclutador — no debe tener botón Postularse
+                        val esProyectoPropio = !SessionManager.currentUserId.isNullOrBlank() &&
+                            project.creadoPorId == SessionManager.currentUserId
+
+                        // Verificar si ya se postuló a este proyecto
+                        val yaPostulado = activityState.postulaciones.any { it.vacanteId == project.id }
+
+                        ProjectCard(
+                            title = project.title,
+                            price = "S/.${project.budget}",
+                            priceType = "Precio Fijo",
+                            company = project.company,
+                            timeAgo = formatearFechaHoraHome(project.createdAt),
+                            description = project.description,
+                            tags = listOf(project.category),
+                            badgeText = when {
+                                esProyectoPropio -> "Tu oferta"
+                                yaPostulado      -> "Ya postulado"
+                                else             -> "Nuevo"
+                            },
+                            isPrimaryAction = !esProyectoPropio && !yaPostulado,
+                            onApplyClick = {
+                                when {
+                                    SessionManager.isGuest -> showGuestDialog = true
+                                    yaPostulado -> { /* ya postulado, no hacer nada */ }
+                                    esProyectoPropio -> onNavigateToDetail(project.id)
+                                    else -> {
+                                        proyectoParaPostular = project
+                                        mensajePostulacion = ""
+                                    }
+                                }
+                            },
+                            onVerDetalle = { onNavigateToDetail(project.id) }
+                        )
+                    }
+                }
+
+                item { Spacer(modifier = Modifier.height(80.dp)) }
             }
 
-            // 2. BUSCADOR
-            item {
-                OutlinedTextField(
-                    value = "",
-                    onValueChange = {},
-                    modifier = Modifier.fillMaxWidth(),
-                    placeholder = {
-                        Text("Buscar proyectos, habilidades o clientes...", color = Color.Gray, fontSize = 14.sp)
+            // DIÁLOGO de confirmación de postulación
+            proyectoParaPostular?.let { proyecto ->
+                AlertDialog(
+                    onDismissRequest = { proyectoParaPostular = null },
+                    title = { Text("Postularse", fontWeight = FontWeight.Bold) },
+                    text = {
+                        Column {
+                            Text("¿Deseas postularte a \"${proyecto.title}\"?", fontSize = 14.sp)
+                            Spacer(Modifier.height(12.dp))
+                            OutlinedTextField(
+                                value = mensajePostulacion,
+                                onValueChange = { mensajePostulacion = it },
+                                label = { Text("Mensaje de presentación (opcional)") },
+                                modifier = Modifier.fillMaxWidth().height(100.dp),
+                                shape = RoundedCornerShape(8.dp)
+                            )
+                        }
                     },
-                    leadingIcon = {
-                        Icon(imageVector = Icons.Filled.Search, contentDescription = "Buscar", tint = Color.Gray)
+                    confirmButton = {
+                        Button(
+                            onClick = {
+                                activityViewModel.postularse(
+                                    vacanteId = proyecto.id,
+                                    mensajePresentacion = mensajePostulacion
+                                )
+                                proyectoParaPostular = null
+                            },
+                            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF1A365D))
+                        ) { Text("Postularme", color = Color.White) }
                     },
-                    shape = RoundedCornerShape(12.dp),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        unfocusedContainerColor = Color.White,
-                        focusedContainerColor = Color.White,
-                        unfocusedBorderColor = Color.LightGray
-                    ),
-                    singleLine = true
+                    dismissButton = {
+                        TextButton(onClick = { proyectoParaPostular = null }) {
+                            Text("Cancelar", color = Color.Gray)
+                        }
+                    }
                 )
             }
 
-            // 3. CHIPS DE FILTRO
-            item {
-                LazyRow(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    item { FilterChipCustom(text = "Categoría", isSelected = true) }
-                    item { FilterChipCustom(text = "Presupuesto", isSelected = false) }
-                    item { FilterChipCustom(text = "Plazo", isSelected = false) }
-                }
-            }
-
-            // 4. TÍTULO DE SECCIÓN
-            item {
-                Row(
+            // BANNER de postulación exitosa (superpuesto abajo)
+            if (activityState.postulacionExitosa) {
+                Surface(
                     modifier = Modifier
+                        .align(Alignment.BottomCenter)
                         .fillMaxWidth()
-                        .padding(top = 8.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
+                        .padding(24.dp),
+                    shape = RoundedCornerShape(12.dp),
+                    color = Color(0xFFD1FAE5)
                 ) {
-                    Text(text = "Recomendados para ti", fontSize = 18.sp, fontWeight = FontWeight.Bold)
-                    Text(text = "Ver todo", fontSize = 14.sp, color = Color(0xFF1A365D), fontWeight = FontWeight.Medium)
-                }
-            }
-
-            // 5. LISTA DE TARJETAS DE AWS
-            if (isLoading) {
-                item {
-                    Box(
-                        modifier = Modifier.fillMaxWidth().padding(32.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        CircularProgressIndicator(color = Color(0xFF1A365D))
-                    }
-                }
-            } else {
-                items(projects) { project ->
-                    ProjectCard(
-                        title = project.title,
-                        price = "S/.${project.budget}",
-                        priceType = "Precio Fijo",
-                        company = project.company,
-                        timeAgo = "Reciente",
-                        description = project.description,
-                        tags = listOf(project.category),
-                        badgeText = "Nuevo",
-                        isPrimaryAction = true,
-                        // 4. ¡LA ACCIÓN DESDE LA TARJETA!
-                        onApplyClick = {
-                            if (SessionManager.isGuest) {
-                                showGuestDialog = true
-                            } else {
-                                // Aquí irá la lógica de postularse real en el futuro
-                            }
-                        }
+                    Text(
+                        "¡Postulación enviada! Revísala en la pestaña Actividad.",
+                        color = Color(0xFF065F46),
+                        modifier = Modifier.padding(16.dp),
+                        fontWeight = FontWeight.Medium,
+                        fontSize = 13.sp
                     )
                 }
             }
 
-            // 6. TARJETA DE TALENTO
-            item {
-                TalentCard(
-                    name = "Arturo Vance",
-                    role = "Arquitecto Full-Stack Senior",
-                    description = "Más de 12 años de experiencia escalando plataformas SaaS. Experta en React, Go y arquitectura de nube AWS."
-                )
-            }
+            // DIÁLOGO de invitado
+            GuestPromptDialog(
+                showDialog = showGuestDialog,
+                onDismiss = { showGuestDialog = false },
+                onNavigateToLogin = {
+                    showGuestDialog = false
+                    onNavigateToLogin()
+                }
+            )
 
-            // 7. TARJETA MANUAL
-            item {
-                ProjectCard(
-                    title = "Logo e Identidad de Marca",
-                    price = "S/.800",
-                    priceType = "Precio Fijo",
-                    company = "5 días",
-                    timeAgo = "",
-                    description = "Crear una identidad de marca minimalista para una startup de moda sostenible,...",
-                    tags = listOf("Branding", "Diseño de Logo"),
-                    isPrimaryAction = false,
-                    onApplyClick = {
-                        if (SessionManager.isGuest) showGuestDialog = true
-                    }
-                )
-            }
+        } // fin Box
+    } // fin Scaffold
+}
 
-            item { Spacer(modifier = Modifier.height(80.dp)) }
-        }
+// ─────────────────────────────────────────────────────────────────────────────
+// COMPONENTES REUTILIZABLES
+// ─────────────────────────────────────────────────────────────────────────────
 
-        // 5. EL DIÁLOGO DE INVITADO (Aparecerá por encima de todo)
-        GuestPromptDialog(
-            showDialog = showGuestDialog,
-            onDismiss = { showGuestDialog = false },
-            onNavigateToLogin = {
-                showGuestDialog = false
-                onNavigateToLogin()
-            }
-        )
+// Formatea ISO 8601 → "15 ene 2024 • 14:32" o "Reciente" si está vacío
+fun formatearFechaHoraHome(iso: String): String {
+    if (iso.isBlank()) return "Reciente"
+    return try {
+        val limpio = iso.replace("Z", "").replace("T", " ").take(16)
+        val partes = limpio.split(" ")
+        val fecha = partes[0]
+        val hora  = partes.getOrNull(1) ?: ""
+        val meses = listOf("","ene","feb","mar","abr","may","jun","jul","ago","sep","oct","nov","dic")
+        val (anio, mes, dia) = fecha.split("-")
+        val mesNombre = meses.getOrElse(mes.toIntOrNull() ?: 0) { mes }
+        if (hora.isNotBlank()) "$dia $mesNombre $anio • $hora" else "$dia $mesNombre $anio"
+    } catch (e: Exception) {
+        "Reciente"
     }
 }
 
-// --- COMPONENTES REUTILIZABLES ---
-
 @Composable
-fun FilterChipCustom(text: String, isSelected: Boolean) {
+fun FilterChipCustom(text: String, isSelected: Boolean, onClick: () -> Unit = {}) {
     Surface(
         shape = RoundedCornerShape(20.dp),
         color = if (isSelected) Color(0xFF294485) else Color(0xFFE9ECEF),
-        modifier = Modifier.height(32.dp)
+        modifier = Modifier.height(32.dp).clickable { onClick() }
     ) {
         Box(contentAlignment = Alignment.Center, modifier = Modifier.padding(horizontal = 16.dp)) {
             Text(
@@ -245,9 +348,17 @@ fun FilterChipCustom(text: String, isSelected: Boolean) {
 
 @Composable
 fun ProjectCard(
-    title: String, price: String, priceType: String, company: String, timeAgo: String,
-    description: String, tags: List<String>, badgeText: String? = null, isPrimaryAction: Boolean,
-    onApplyClick: () -> Unit // 6. NUEVO PARÁMETRO: Le enseñamos a la tarjeta a recibir el clic
+    title: String,
+    price: String,
+    priceType: String,
+    company: String,
+    timeAgo: String,
+    description: String,
+    tags: List<String>,
+    badgeText: String? = null,
+    isPrimaryAction: Boolean,
+    onApplyClick: () -> Unit,
+    onVerDetalle: () -> Unit = {}
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -312,94 +423,36 @@ fun ProjectCard(
 
             Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                 if (isPrimaryAction) {
+                    // Botón Postularse — ocupa todo el ancho
                     Button(
-                        onClick = onApplyClick, // 7. LO CONECTAMOS AL BOTÓN DE POSTULARSE
+                        onClick = onApplyClick,
                         modifier = Modifier.weight(1f).height(40.dp),
                         shape = RoundedCornerShape(8.dp),
                         colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF294485))
                     ) {
                         Text("Postularse", fontSize = 14.sp)
                     }
-                    Spacer(modifier = Modifier.width(8.dp))
-                    OutlinedIconButton(
-                        onClick = { },
+                    Spacer(Modifier.width(8.dp))
+                    // Botón "Ver" como secundario para ir al detalle
+                    OutlinedButton(
+                        onClick = onVerDetalle,
+                        modifier = Modifier.height(40.dp),
                         shape = RoundedCornerShape(8.dp),
-                        modifier = Modifier.size(40.dp)
+                        contentPadding = PaddingValues(horizontal = 12.dp)
                     ) {
-                        Icon(imageVector = Icons.Filled.BookmarkBorder, contentDescription = "Guardar", tint = Color(0xFF1A365D))
+                        Text("Ver", color = Color(0xFF294485), fontSize = 13.sp)
                     }
                 } else {
+                    // Proyecto propio o reclutador viendo servicio — botón "Ver detalle" completo
                     OutlinedButton(
-                        onClick = onApplyClick, // TAMBIÉN LO CONECTAMOS AQUÍ
+                        onClick = onVerDetalle,
                         modifier = Modifier.fillMaxWidth().height(40.dp),
                         shape = RoundedCornerShape(8.dp),
                         border = BorderStroke(1.dp, Color(0xFF294485))
                     ) {
-                        Text("Enviar Propuesta", color = Color(0xFF294485), fontSize = 14.sp)
+                        Text("Ver detalle", color = Color(0xFF294485), fontSize = 14.sp)
                     }
                 }
-            }
-        }
-    }
-}
-
-
-@Composable
-fun TalentCard(name: String, role: String, description: String) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFF0A1F44)) // Fondo azul oscuro
-    ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            // Etiqueta Verde
-            Surface(
-                shape = RoundedCornerShape(12.dp),
-                color = Color(0xFF047857),
-                modifier = Modifier.padding(bottom = 12.dp)
-            ) {
-                Text(
-                    text = "TALENTO DESTACADO",
-                    color = Color.White,
-                    fontSize = 9.sp,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
-                )
-            }
-
-            // Perfil
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Box(
-                    modifier = Modifier
-                        .size(48.dp)
-                        .clip(CircleShape)
-                        .background(Color.LightGray),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(imageVector = Icons.Filled.Person, contentDescription = "Avatar", tint = Color.White)
-                }
-                Spacer(modifier = Modifier.width(12.dp))
-                Column {
-                    Text(text = name, fontSize = 16.sp, fontWeight = FontWeight.Bold, color = Color.White)
-                    Text(text = role, fontSize = 13.sp, color = Color(0xFFA0AEC0))
-                }
-            }
-
-            Spacer(modifier = Modifier.height(12.dp))
-
-            Text(text = description, fontSize = 13.sp, color = Color.White, lineHeight = 18.sp)
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Button(
-                onClick = { },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(40.dp),
-                shape = RoundedCornerShape(8.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = Color.White)
-            ) {
-                Text("Invitar al Proyecto", color = Color(0xFF0A1F44), fontSize = 14.sp, fontWeight = FontWeight.Bold)
             }
         }
     }

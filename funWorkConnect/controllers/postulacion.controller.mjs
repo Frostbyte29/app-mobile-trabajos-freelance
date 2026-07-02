@@ -1,32 +1,128 @@
 import * as service from "../services/postulacion.service.mjs";
 import { postulacionSchema, estadoPostulacionSchema } from "../validators/postulacion.schema.mjs";
-import { ok, created, noContent, badRequest, notFound } from "../utils/response.mjs";
+import { ok, created, noContent, badRequest, notFound, conflict, internalError } from "../utils/response.mjs";
 
+// Crear una nueva postulación
 export const crear = async (event) => {
-  const parsed = postulacionSchema.safeParse(JSON.parse(event.body));
-  if (!parsed.success) return badRequest(parsed.error);
-  return created(await service.crear(parsed.data));
+  try {
+    const parsed = postulacionSchema.safeParse(JSON.parse(event.body));
+    
+    if (!parsed.success) {
+      return badRequest({
+        message: "Datos inválidos",
+        errors: parsed.error.flatten().fieldErrors
+      });
+    }
+
+    const postulacion = await service.crear(parsed.data);
+    return created(postulacion);
+  } catch (error) {
+    if (error.message.includes("Ya has postulado")) {
+      return conflict({ message: error.message });
+    }
+    console.error("Error al crear postulación:", error);
+    return internalError({ message: "Error al crear la postulación" });
+  }
 };
 
+// Obtener una postulación por ID
 export const getPorId = async (id) => {
-  const postulacion = await service.getPorId(id);
-  if (!postulacion) return notFound("Postulación no encontrada");
-  return ok(postulacion);
+  try {
+    const postulacion = await service.getPorId(id);
+    if (!postulacion) {
+      return notFound({ message: "Postulación no encontrada" });
+    }
+    return ok(postulacion);
+  } catch (error) {
+    console.error("Error al obtener postulación:", error);
+    return internalError({ message: "Error al obtener la postulación" });
+  }
 };
 
-// PUT /postulaciones/{id} solo cambia estado (aceptar/rechazar/revisar)
+// Actualizar el estado de una postulación
 export const actualizar = async (id, event) => {
-  const parsed = estadoPostulacionSchema.safeParse(JSON.parse(event.body));
-  if (!parsed.success) return badRequest(parsed.error);
-  return ok(await service.actualizarEstado(id, parsed.data.estado));
+  try {
+    const parsed = estadoPostulacionSchema.safeParse(JSON.parse(event.body));
+    
+    if (!parsed.success) {
+      return badRequest({
+        message: "Datos inválidos",
+        errors: parsed.error.flatten().fieldErrors
+      });
+    }
+
+    const postulacionActualizada = await service.actualizarEstado(
+      id,
+      parsed.data.estado,
+      parsed.data.comentario
+    );
+    
+    return ok(postulacionActualizada);
+  } catch (error) {
+    if (error.message.includes("no encontrada")) {
+      return notFound({ message: error.message });
+    }
+    console.error("Error al actualizar postulación:", error);
+    return internalError({ message: "Error al actualizar la postulación" });
+  }
 };
 
-export const eliminar = async (id) => { await service.eliminar(id); return noContent(); };
+// Eliminar una postulación
+export const eliminar = async (id) => {
+  try {
+    await service.eliminar(id);
+    return noContent();
+  } catch (error) {
+    console.error("Error al eliminar postulación:", error);
+    return internalError({ message: "Error al eliminar la postulación" });
+  }
+};
 
-// GET /postulaciones?candidatoId=x  ó  GET /postulaciones?vacanteId=y
+// Listar postulaciones con filtros
 export const listar = async (query) => {
-  const limit = query?.limit ? parseInt(query.limit) : 10;
-  if (query?.candidatoId) return ok(await service.listarPorCandidato(query.candidatoId, limit, query.lastKey));
-  if (query?.vacanteId) return ok(await service.listarPorVacante(query.vacanteId, limit, query.lastKey));
-  return badRequest({ message: "Debes pasar candidatoId o vacanteId como query param" });
+  try {
+    const limit = query?.limit ? Math.min(parseInt(query.limit), 100) : 20;
+
+    // Listar por candidato
+    if (query?.candidatoId) {
+      const resultado = await service.listarPorCandidato(
+        query.candidatoId,
+        limit,
+        query.lastKey
+      );
+      return ok(resultado);
+    }
+
+    // Listar por vacante (incluye estadísticas)
+    if (query?.vacanteId) {
+      const resultado = await service.listarPorVacante(
+        query.vacanteId,
+        limit,
+        query.lastKey
+      );
+      return ok(resultado);
+    }
+
+    return badRequest({
+      message: "Debes proporcionar candidatoId o vacanteId como parámetro de consulta"
+    });
+  } catch (error) {
+    console.error("Error al listar postulaciones:", error);
+    return internalError({ message: "Error al listar las postulaciones" });
+  }
+};
+
+// Obtener estadísticas de un candidato
+export const obtenerEstadisticas = async (candidatoId) => {
+  try {
+    if (!candidatoId) {
+      return badRequest({ message: "Se requiere el ID del candidato" });
+    }
+
+    const estadisticas = await service.obtenerEstadisticasCandidato(candidatoId);
+    return ok(estadisticas);
+  } catch (error) {
+    console.error("Error al obtener estadísticas:", error);
+    return internalError({ message: "Error al obtener estadísticas" });
+  }
 };

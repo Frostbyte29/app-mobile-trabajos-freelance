@@ -19,11 +19,11 @@ class AuthViewModel(
     private val _state = MutableStateFlow(AuthState())
     val state: StateFlow<AuthState> = _state.asStateFlow()
 
-    fun validateEmail(email: String): Boolean {
+    fun validarCorreo(email: String): Boolean {
         return email.isNotBlank() && Patterns.EMAIL_ADDRESS.matcher(email).matches()
     }
 
-    fun validatePassword(password: String): Boolean {
+    fun validarContrasena(password: String): Boolean {
         return password.length >= 8
     }
 
@@ -32,12 +32,12 @@ class AuthViewModel(
     }
 
     // --- LOGIN (Validación Híbrida conectada a AWS) ---
-    fun loginUser(email: String, password: String, onNavigateToHome: () -> Unit) {
-        if (!validateEmail(email)) {
+    fun iniciarSesion(email: String, password: String, onNavigateToHome: () -> Unit) {
+        if (!validarCorreo(email)) {
             _state.update { it.copy(errorMessage = "El correo electrónico no es válido.") }
             return
         }
-        if (!validatePassword(password)) {
+        if (!validarContrasena(password)) {
             _state.update { it.copy(errorMessage = "La contraseña debe tener al menos 8 caracteres.") }
             return
         }
@@ -47,7 +47,7 @@ class AuthViewModel(
             _state.update { it.copy(isLoading = true, errorMessage = null) }
 
             // ¡Vamos a AWS a preguntar si el correo existe!
-            val emailExiste = repository.verifyEmailExists(email)
+            val emailExiste = repository.verificarCorreoExiste(email)
 
             if (emailExiste) {
                 // ¡Éxito! El correo está en la base de datos
@@ -62,7 +62,7 @@ class AuthViewModel(
 
 
     // --- REGISTRO (Conectado a AWS DynamoDB) ---
-    fun registerUser(
+    fun registrarUsuario(
         fullName: String,
         email: String,
         password: String,
@@ -74,11 +74,11 @@ class AuthViewModel(
             _state.update { it.copy(errorMessage = "El nombre no puede estar vacío.") }
             return
         }
-        if (!validateEmail(email)) {
+        if (!validarCorreo(email)) {
             _state.update { it.copy(errorMessage = "El correo electrónico no es válido.") }
             return
         }
-        if (!validatePassword(password)) {
+        if (!validarContrasena(password)) {
             _state.update { it.copy(errorMessage = "La contraseña debe tener al menos 8 caracteres.") }
             return
         }
@@ -92,7 +92,9 @@ class AuthViewModel(
 
             val partesDelNombre = fullName.trim().split(" ", limit = 2)
             val nombres = partesDelNombre.getOrNull(0) ?: ""
-            val apellidos = partesDelNombre.getOrNull(1) ?: ""
+            // Si solo puso un nombre sin apellido, usamos un espacio como fallback
+            // para evitar que el backend rechace el campo vacío
+            val apellidos = partesDelNombre.getOrNull(1)?.takeIf { it.isNotBlank() } ?: "-"
 
             // ¡LA MAGIA ESTÁ AQUÍ!
             // Si roleId es 1, es candidato. Si es 2, es reclutador.
@@ -106,7 +108,7 @@ class AuthViewModel(
                 roles = listOf(rolElegido) // Enviamos el rol dinámico a AWS
             )
 
-            val guardadoExitoso = repository.registerCandidate(request)
+            val guardadoExitoso = repository.registrarCandidato(request)
 
             if (guardadoExitoso) {
                 _state.update { it.copy(isLoading = false, isSuccess = true) }

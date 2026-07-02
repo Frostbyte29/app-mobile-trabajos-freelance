@@ -27,6 +27,9 @@ export const handler = async (event) => {
     const partes = (event.rawPath || "/").split("/").filter(Boolean);
     const [recurso, id, sub] = partes;
 
+    // ───────────────────────────────────────────────────────────────────────
+    // RUTAS ESPECIALES: PROJECTS
+    // ───────────────────────────────────────────────────────────────────────
     if (recurso === "projects") {
       if (method === "POST") return projectController.crearProject(event);
       if (method === "GET" && !id)
@@ -42,6 +45,34 @@ export const handler = async (event) => {
       };
     }
 
+    // ───────────────────────────────────────────────────────────────────────
+    // RUTAS ESPECIALES: POSTULACIONES (con estadísticas)
+    // ───────────────────────────────────────────────────────────────────────
+    if (recurso === "postulaciones") {
+      // GET /postulaciones/estadisticas?candidatoId=xxx
+      if (method === "GET" && id === "estadisticas") {
+        return postulacionController.obtenerEstadisticas(
+          event.queryStringParameters?.candidatoId
+        );
+      }
+      
+      // Rutas estándar de postulaciones
+      if (method === "POST") return postulacionController.crear(event);
+      if (method === "GET" && !id)
+        return postulacionController.listar(event.queryStringParameters);
+      if (method === "GET" && id) return postulacionController.getPorId(id);
+      if (method === "PUT" && id) return postulacionController.actualizar(id, event);
+      if (method === "DELETE" && id) return postulacionController.eliminar(id);
+      
+      return {
+        statusCode: 405,
+        body: JSON.stringify({ message: "Método no permitido" }),
+      };
+    }
+
+    // ───────────────────────────────────────────────────────────────────────
+    // RUTAS ESPECIALES: CONVERSACIONES CON MENSAJES
+    // ───────────────────────────────────────────────────────────────────────
     if (recurso === "conversaciones" && id && sub === "mensajes") {
       if (method === "GET")
         return mensajeController.getMensajes(id, event.queryStringParameters);
@@ -52,6 +83,9 @@ export const handler = async (event) => {
       };
     }
 
+    // ───────────────────────────────────────────────────────────────────────
+    // RUTAS GENÉRICAS (CRUD estándar)
+    // ───────────────────────────────────────────────────────────────────────
     const controller = recursosGenericos[recurso];
     if (!controller) {
       return {

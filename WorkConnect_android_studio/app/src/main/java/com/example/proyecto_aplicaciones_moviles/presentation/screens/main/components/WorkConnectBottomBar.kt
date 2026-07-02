@@ -2,8 +2,8 @@ package com.example.proyecto_aplicaciones_moviles.presentation.screens.main.comp
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddCircle
+import androidx.compose.material.icons.filled.Assignment
 import androidx.compose.material.icons.filled.GridView
-import androidx.compose.material.icons.filled.MailOutline
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
@@ -25,7 +25,8 @@ sealed class BottomNavItem(
     object Inicio : BottomNavItem("Inicio", Icons.Filled.GridView, "inicio_tab")
     object Explorar : BottomNavItem("Explorar", Icons.Filled.Search, "explorar_tab")
     object Publicar : BottomNavItem("Publicar", Icons.Filled.AddCircle, "publicar_tab")
-    object Mensajes : BottomNavItem("Mensajes", Icons.Filled.MailOutline, "mensajes_tab", hasNews = true)
+    // Mensajes renombrado a Actividad — muestra postulaciones y ofertas según el rol
+    object Mensajes : BottomNavItem("Actividad", Icons.Filled.Assignment, "mensajes_tab")
     object Perfil : BottomNavItem("Perfil", Icons.Filled.Person, "perfil_tab")
 }
 

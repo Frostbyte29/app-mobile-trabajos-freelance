@@ -9,7 +9,7 @@ class AuthRepositoryImpl(
     private val api: WorkConnectApi
 ) : AuthRepository {
 
-    override suspend fun registerCandidate(request: UserRequestDto): Boolean {
+    override suspend fun registrarCandidato(request: UserRequestDto): Boolean {
         return try {
             val response = api.registerCandidate(request)
             response.isSuccessful // Devuelve true si AWS responde exitosamente (Código 200-299)
@@ -19,7 +19,7 @@ class AuthRepositoryImpl(
         }
     }
 
-    override suspend fun verifyEmailExists(email: String): Boolean {
+    override suspend fun verificarCorreoExiste(email: String): Boolean {
         return try {
             val emailLimpio = email.trim().lowercase()
             android.util.Log.d("AWS_LOGIN", "Intentando buscar el correo: '$emailLimpio'")
