@@ -18,7 +18,7 @@ fun WorkConnectButton(
     text: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    containerColor: Color = Color(0xFF1A365D) // Azul oscuro de tu diseño
+    containerColor: Color = Color(0xFF1A365D)
 ) {
     Button(
         onClick = onClick,
@@ -26,7 +26,7 @@ fun WorkConnectButton(
             .fillMaxWidth()
             .height(50.dp),
         colors = ButtonDefaults.buttonColors(containerColor = containerColor),
-        shape = RoundedCornerShape(8.dp) // Bordes redondeados suaves
+        shape = RoundedCornerShape(8.dp)
     ) {
         Text(
             text = text,

@@ -5,10 +5,9 @@ data class Valoracion(
     val usuarioEmisorId: String,
     val usuarioReceptorId: String,
     val proyectoId: String?,
-    val puntuacion: Int,           // 1 a 5
+    val puntuacion: Int,
     val comentario: String,
     val fechaCreacion: String,
     val editada: Boolean = false,
-    // Enriquecido — nombre del emisor para mostrar en la UI
     val nombreEmisor: String = ""
 )

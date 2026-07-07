@@ -7,7 +7,8 @@ import com.example.proyecto_aplicaciones_moviles.data.remote.PostulacionRequestD
 import com.example.proyecto_aplicaciones_moviles.data.remote.WorkConnectApi
 import com.example.proyecto_aplicaciones_moviles.data.remote.toDomain
 import com.example.proyecto_aplicaciones_moviles.domain.model.Postulacion
-import com.example.proyecto_aplicaciones_moviles.domain.model.Project
+import com.example.proyecto_aplicaciones_moviles.domain.model.Proyecto
+import com.example.proyecto_aplicaciones_moviles.domain.model.TipoOferta
 import com.example.proyecto_aplicaciones_moviles.domain.repository.PostulacionRepository
 
 class PostulacionRepositoryImpl(
@@ -17,14 +18,18 @@ class PostulacionRepositoryImpl(
     override suspend fun crearPostulacion(
         candidatoId: String,
         vacanteId: String,
-        mensajePresentacion: String
+        mensajePresentacion: String,
+        linkedinUrl: String?,
+        repoUrl: String?
     ): Boolean {
         return try {
             val response = api.crearPostulacion(
                 PostulacionRequestDto(
                     candidatoId = candidatoId,
                     vacanteId = vacanteId,
-                    mensajePresentacion = mensajePresentacion
+                    mensajePresentacion = mensajePresentacion,
+                    linkedinUrl = linkedinUrl?.takeIf { it.isNotBlank() },
+                    repoUrl = repoUrl?.takeIf { it.isNotBlank() }
                 )
             )
             if (response.code() == 409) {
@@ -37,8 +42,6 @@ class PostulacionRepositoryImpl(
         }
     }
 
-    // Carga postulaciones del candidato y enriquece con el título del proyecto.
-    // Busca cada vacante individualmente por ID para evitar problemas de paginación.
     override suspend fun obtenerPostulacionesCandidato(candidatoId: String): List<Postulacion> {
         return try {
             val response = api.getPostulacionesCandidato(candidatoId)
@@ -49,8 +52,6 @@ class PostulacionRepositoryImpl(
 
             val dtos = response.body()?.data?.items ?: return emptyList()
 
-            // Construimos un mapa de vacanteId → título consultando cada proyecto por ID
-            // Usamos distinctBy para no consultar el mismo proyecto varias veces
             val titulosPorId = dtos
                 .mapNotNull { it.vacanteId }
                 .distinct()
@@ -73,7 +74,9 @@ class PostulacionRepositoryImpl(
                     estado = dto.estado ?: "postulado",
                     fechaPostulacion = dto.fechaPostulacion ?: "",
                     tituloVacante = titulosPorId[vacanteId] ?: "Sin título",
-                    nombreCandidato = ""
+                    nombreCandidato = "",
+                    linkedinUrl = dto.linkedinUrl,
+                    repoUrl = dto.repoUrl
                 )
             }
         } catch (e: Exception) {
@@ -82,7 +85,6 @@ class PostulacionRepositoryImpl(
         }
     }
 
-    // Carga postulaciones de una vacante y enriquece con el nombre del candidato.
     override suspend fun obtenerPostulacionesVacante(vacanteId: String): List<Postulacion> {
         return try {
             val response = api.getPostulacionesVacante(vacanteId)
@@ -93,7 +95,6 @@ class PostulacionRepositoryImpl(
 
             val dtos = response.body()?.data?.items ?: return emptyList()
 
-            // Cargamos todos los usuarios una sola vez para resolver nombres
             val usuarios = try {
                 val r = api.getUsers()
                 if (r.isSuccessful) {
@@ -118,7 +119,9 @@ class PostulacionRepositoryImpl(
                     estado = dto.estado ?: "postulado",
                     fechaPostulacion = dto.fechaPostulacion ?: "",
                     tituloVacante = "",
-                    nombreCandidato = nombre
+                    nombreCandidato = nombre,
+                    linkedinUrl = dto.linkedinUrl,
+                    repoUrl = dto.repoUrl
                 )
             }
         } catch (e: Exception) {
@@ -140,9 +143,23 @@ class PostulacionRepositoryImpl(
         }
     }
 
-    // Filtra proyectos del reclutador por userId (creadoPorId) con fallback por empresa.
-    // También enriquece el campo company con el nombre real del usuario publicador.
-    override suspend fun obtenerProyectosReclutador(userId: String): List<Project> {
+    override suspend fun obtenerServiciosCandidato(userId: String): List<Proyecto> {
+        return try {
+            val response = api.getProjects()
+            if (!response.success) return emptyList()
+            response.data.items
+                .map { it.toDomain() }
+                .filter { project ->
+                    project.tipoOferta == TipoOferta.SERVICIO &&
+                    project.creadoPorId != null && project.creadoPorId == userId
+                }
+        } catch (e: Exception) {
+            Log.e("POSTULACION_REPO", "Error servicios candidato: ${e.message}", e)
+            emptyList()
+        }
+    }
+
+    override suspend fun obtenerProyectosReclutador(userId: String): List<Proyecto> {
         return try {
             val empresaNombre = SessionManager.currentEmpresaNombre ?: ""
             val response = api.getProjects()
@@ -151,8 +168,10 @@ class PostulacionRepositoryImpl(
             response.data.items
                 .map { it.toDomain() }
                 .filter { project ->
-                    (project.creadoPorId != null && project.creadoPorId == userId) ||
-                    (project.creadoPorId == null && empresaNombre.isNotBlank() && project.company == empresaNombre)
+                    project.tipoOferta == TipoOferta.TRABAJO && (
+                        (project.creadoPorId != null && project.creadoPorId == userId) ||
+                        (project.creadoPorId == null && empresaNombre.isNotBlank() && project.company == empresaNombre)
+                    )
                 }
         } catch (e: Exception) {
             Log.e("POSTULACION_REPO", "Error proyectos reclutador: ${e.message}", e)

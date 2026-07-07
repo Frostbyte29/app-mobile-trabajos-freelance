@@ -1,11 +1,9 @@
 import { z } from "zod";
 
-// Sub-schema para los datos de empresa del reclutador
-// nullable() acepta tanto null (Gson) como undefined (JS nativo)
 const empresaReclutadorSchema = z.object({
   nombre: z.string().optional(),
   rubro: z.string().optional(),
-  correoContacto: z.string().optional(),   // sin .email() para evitar fallos con string vacío
+  correoContacto: z.string().optional(),  
   telefono: z.string().optional(),
   sitioWeb: z.string().optional(),
   direccion: z.string().optional(),
@@ -17,6 +15,7 @@ export const usuarioSchema = z.object({
   correo: z.string().email(),
   telefono: z.string().optional(),
   fotoPerfilUrl: z.string().optional(),
+  acercaDe: z.string().max(1000).optional(),
   roles: z.array(z.enum(["candidato", "reclutador"])).min(1),
   empresaInfo: empresaReclutadorSchema,
 });

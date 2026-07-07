@@ -6,9 +6,10 @@ data class Postulacion(
     val candidatoId: String,
     val vacanteId: String,
     val mensajePresentacion: String,
-    val estado: String,           // "postulado", "en_revision", "aceptado", "rechazado"
+    val estado: String,
     val fechaPostulacion: String,
-    // Campos enriquecidos — se resuelven en el repositorio para evitar mostrar IDs en la UI
-    val tituloVacante: String = "",    // título del proyecto al que se postuló
-    val nombreCandidato: String = ""   // nombre completo del candidato que se postuló
+    val tituloVacante: String = "",
+    val nombreCandidato: String = "",
+    val linkedinUrl: String? = null,
+    val repoUrl: String? = null
 )

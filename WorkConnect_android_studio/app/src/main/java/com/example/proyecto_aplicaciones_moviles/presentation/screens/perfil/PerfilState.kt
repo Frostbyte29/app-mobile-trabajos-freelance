@@ -1,0 +1,38 @@
+package com.example.proyecto_aplicaciones_moviles.presentation.screens.perfil
+
+data class PerfilState(
+
+    val isLoading: Boolean = false,
+    val isSavingRole: Boolean = false,
+    val isSavingEdit: Boolean = false,
+    val userId: String? = null,
+    val nombres: String = "",
+    val apellidos: String = "",
+    val correo: String = "",
+    val telefono: String = "",
+    val fotoPerfilUrl: String? = null,
+    val acercaDe: String = "",
+    val roles: List<String> = emptyList(),
+    val activeRole: String? = null,
+    val empresaNombre: String = "",
+    val empresaRubro: String = "",
+    val empresaCorreoContacto: String = "",
+    val empresaTelefono: String = "",
+    val empresaSitioWeb: String = "",
+    val empresaDireccion: String = "",
+    val editMode: String = "none",
+    val editNombres: String = "",
+    val editApellidos: String = "",
+    val editCodigoPais: String = "51",
+    val editNumeroTelefono: String = "",
+    val editAcercaDe: String = "",
+    val editEmpresaNombre: String = "",
+    val editEmpresaRubro: String = "",
+    val editEmpresaCorreoContacto: String = "",
+    val editEmpresaTelefono: String = "",
+    val editEmpresaSitioWeb: String = "",
+    val editEmpresaDireccion: String = "",
+    val errorMessage: String? = null,
+    val roleAddedSuccess: Boolean = false,
+    val editSuccess: Boolean = false
+)

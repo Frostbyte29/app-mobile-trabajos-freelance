@@ -24,7 +24,7 @@ fun WorkConnectTextField(
     OutlinedTextField(
         value = value,
         onValueChange = onValueChange,
-        label = { Text(label) },
+        label = { Text(label, color = Color(0xFF64748B)) },
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(8.dp),
         singleLine = true,
@@ -33,8 +33,8 @@ fun WorkConnectTextField(
         colors = TextFieldDefaults.colors(
             focusedContainerColor = Color.Transparent,
             unfocusedContainerColor = Color.Transparent,
-            focusedIndicatorColor = Color(0xFF1A365D), // Borde azul al escribir
-            unfocusedIndicatorColor = Color.Gray // Borde gris por defecto
+            focusedIndicatorColor = Color(0xFF1A365D),
+            unfocusedIndicatorColor = Color.Gray
         )
     )
 }

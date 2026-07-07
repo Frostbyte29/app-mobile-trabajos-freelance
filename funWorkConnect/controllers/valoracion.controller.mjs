@@ -6,12 +6,22 @@ import {
   noContent,
   badRequest,
   notFound,
+  conflict,
+  internalError,
 } from "../utils/response.mjs";
 
 export const crear = async (event) => {
   const parsed = valoracionSchema.safeParse(JSON.parse(event.body));
   if (!parsed.success) return badRequest(parsed.error);
-  return created(await service.crear(parsed.data));
+  try {
+    return created(await service.crear(parsed.data));
+  } catch (error) {
+    if (error.message.includes("Solo puedes valorar")) {
+      return conflict({ message: error.message });
+    }
+    console.error("Error al crear valoración:", error);
+    return internalError({ message: "Error al crear la valoración" });
+  }
 };
 
 export const getPorId = async (id) => {
@@ -40,7 +50,6 @@ export const listar = async (query) => {
   );
 };
 
-// Editar solo puntuacion/comentario, queda marcada "editada"
 export const actualizar = async (id, event) => {
   const parsed = valoracionUpdateSchema.safeParse(JSON.parse(event.body));
   if (!parsed.success) return badRequest(parsed.error);

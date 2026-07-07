@@ -11,52 +11,49 @@ import retrofit2.http.Query
 
 interface WorkConnectApi {
 
-    // --- PROYECTOS ---
+    // PROYECTOS
 
     @GET("projects")
-    suspend fun getProjects(): ProjectResponseWrapper
+    suspend fun getProjects(): ProyectoResponseWrapper
 
-    // Obtener un proyecto por su ID — para resolver título al mostrar postulaciones
+    // Obtener un proyecto por su ID
     @GET("projects/{id}")
-    suspend fun getProjectById(@retrofit2.http.Path("id") id: String): retrofit2.Response<ProjectSingleResponseWrapper>
+    suspend fun getProjectById(@retrofit2.http.Path("id") id: String): retrofit2.Response<ProyectotSingleResponseWrapper>
 
-    // ResponseBody en lugar de Any — acepta cualquier respuesta JSON sin fallar al parsear
     @POST("projects")
-    suspend fun createProject(@Body request: ProjectRequestDto): Response<ResponseBody>
+    suspend fun createProject(@Body request: ProyectoRequestDto): Response<ResponseBody>
 
-    // --- USUARIOS ---
+    // USUARIOS
 
-    // ResponseBody evita el error de parseo cuando el backend devuelve 201 con body
     @POST("usuarios")
-    suspend fun registerCandidate(@Body request: UserRequestDto): Response<ResponseBody>
+    suspend fun registerCandidate(@Body request: UsuarioRequestDto): Response<ResponseBody>
 
-    // Traemos hasta 100 usuarios para el login — evita problema de paginación
     @GET("usuarios")
     suspend fun getUsers(
         @Query("limit") limit: Int = 100
-    ): Response<UserListResponseWrapper>
+    ): Response<UsuarioListResponseWrapper>
 
     @GET("usuarios/{id}")
-    suspend fun getUserById(@Path("id") id: String): Response<UserSingleResponseWrapper>
+    suspend fun getUserById(@Path("id") id: String): Response<UsuarioSingleResponseWrapper>
 
     @PUT("usuarios/{id}")
     suspend fun updateUser(
         @Path("id") id: String,
-        @Body request: UserUpdateRolesDto
+        @Body request: UsuarioUpdateRolesDto
     ): Response<ResponseBody>
 
     @PUT("usuarios/{id}")
     suspend fun updateUserData(
         @Path("id") id: String,
-        @Body request: UserUpdateDataDto
+        @Body request: UsuarioUpdateDataDto
     ): Response<ResponseBody>
 
-    // --- CATEGORÍAS ---
+    // CATEGORÍAS
 
     @GET("categorias")
     suspend fun getCategorias(): Response<CategoriaListResponseWrapper>
 
-    // --- POSTULACIONES ---
+    // POSTULACIONES
 
     @POST("postulaciones")
     suspend fun crearPostulacion(@Body request: PostulacionRequestDto): Response<ResponseBody>
@@ -79,20 +76,27 @@ interface WorkConnectApi {
         @Body request: PostulacionEstadoDto
     ): Response<ResponseBody>
 
-    // --- VALORACIONES ---
+    // VALORACIONES
 
-    // Crear valoración/comentario sobre un usuario en el contexto de una oferta
+    // Crear valoración
     @POST("valoraciones")
     suspend fun crearValoracion(@Body request: ValoracionRequestDto): Response<ResponseBody>
 
-    // Listar valoraciones recibidas por un usuario
+    // Editar una valoración
+    @PUT("valoraciones/{id}")
+    suspend fun actualizarValoracion(
+        @Path("id") id: String,
+        @Body request: ValoracionUpdateDto
+    ): Response<ResponseBody>
+
+    // Listar valoraciones
     @GET("valoraciones")
     suspend fun getValoraciones(
         @Query("usuarioReceptorId") usuarioReceptorId: String,
         @Query("limit") limit: Int = 20
     ): Response<ValoracionListResponseWrapper>
 
-    // --- NOTIFICACIONES ---
+    // NOTIFICACIONES
 
     @GET("notificaciones")
     suspend fun getNotificaciones(
@@ -103,5 +107,49 @@ interface WorkConnectApi {
     @PUT("notificaciones/{id}")
     suspend fun marcarNotificacionLeida(
         @Path("id") id: String
+    ): Response<ResponseBody>
+    // CONTRATOS
+
+    @POST("contratos")
+    suspend fun crearContrato(@Body request: ContratoRequestDto): Response<ResponseBody>
+
+    @PUT("contratos/{id}")
+    suspend fun finalizarContrato(
+        @Path("id") id: String,
+        @Body request: ContratoEstadoDto
+    ): Response<ResponseBody>
+
+    @GET("contratos")
+    suspend fun getContratosPorFreelancer(
+        @Query("freelancerId") freelancerId: String
+    ): Response<ContratoListResponseWrapper>
+
+    @GET("contratos")
+    suspend fun getContratosPorContratante(
+        @Query("contratanteId") contratanteId: String
+    ): Response<ContratoListResponseWrapper>
+
+    // CONVERSACIONES
+
+    @POST("conversaciones")
+    suspend fun crearConversacion(
+        @Body request: ConversacionRequestDto
+    ): Response<ConversacionSingleResponseWrapper>
+
+    @GET("conversaciones")
+    suspend fun getConversaciones(
+        @Query("usuarioId") usuarioId: String
+    ): Response<ConversacionListResponseWrapper>
+
+    @GET("conversaciones/{id}/mensajes")
+    suspend fun getMensajes(
+        @Path("id") conversationId: String,
+        @Query("limit") limit: Int = 100
+    ): Response<MensajeListResponseWrapper>
+
+    @POST("conversaciones/{id}/mensajes")
+    suspend fun enviarMensaje(
+        @Path("id") conversationId: String,
+        @Body request: MensajeRequestDto
     ): Response<ResponseBody>
 }

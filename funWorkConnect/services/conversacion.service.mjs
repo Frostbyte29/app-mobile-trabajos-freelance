@@ -14,5 +14,14 @@ export const eliminar = (id) => repo.eliminarCompleta(id);
 
 export const listarPorUsuario = async (usuarioId, limit = 15, lastKey) => {
   const r = await repo.listarPorUsuario(usuarioId, limit, lastKey);
-  return { items: r.Items, nextKey: r.LastEvaluatedKey ? Buffer.from(JSON.stringify(r.LastEvaluatedKey)).toString("base64") : null };
+  const items = await Promise.all(
+    r.Items.map(async (item) => {
+      if (item.conversacionId) {
+        const full = await repo.getPorId(item.conversacionId);
+        return full.Item ?? item;
+      }
+      return item;
+    })
+  );
+  return { items, nextKey: r.LastEvaluatedKey ? Buffer.from(JSON.stringify(r.LastEvaluatedKey)).toString("base64") : null };
 };

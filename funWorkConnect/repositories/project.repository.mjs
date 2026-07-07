@@ -56,7 +56,6 @@ export const actualizarProject = async (id, updateExpression, names, values) => 
   return { Attributes: stripKeys(result.Attributes) };
 };
 
-// Listado real via GSI1 (mas nuevo primero), reemplaza el Scan
 export const getProjects = async (limit, lastKey) => {
   const result = await ddb.send(new QueryCommand({
     TableName: TABLE,

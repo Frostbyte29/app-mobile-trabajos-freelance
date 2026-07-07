@@ -2,6 +2,7 @@ package com.example.proyecto_aplicaciones_moviles.data.repository
 
 import android.util.Log
 import com.example.proyecto_aplicaciones_moviles.data.remote.ValoracionRequestDto
+import com.example.proyecto_aplicaciones_moviles.data.remote.ValoracionUpdateDto
 import com.example.proyecto_aplicaciones_moviles.data.remote.WorkConnectApi
 import com.example.proyecto_aplicaciones_moviles.domain.model.Valoracion
 import com.example.proyecto_aplicaciones_moviles.domain.repository.ValoracionRepository
@@ -17,7 +18,6 @@ class ValoracionRepositoryImpl(
 
             val dtos = response.body()?.data?.items ?: return emptyList()
 
-            // Cargamos usuarios para resolver el nombre del emisor
             val usuarios = try {
                 val r = api.getUsers()
                 if (r.isSuccessful) r.body()?.data?.items?.associateBy { it.id } ?: emptyMap()
@@ -70,6 +70,22 @@ class ValoracionRepositoryImpl(
             response.isSuccessful
         } catch (e: Exception) {
             Log.e("VALORACION_REPO", "Error al crear: ${e.message}", e)
+            false
+        }
+    }
+
+    override suspend fun actualizarValoracion(valoracionId: String, puntuacion: Int, comentario: String): Boolean {
+        return try {
+            val response = api.actualizarValoracion(
+                id = valoracionId,
+                request = ValoracionUpdateDto(
+                    puntuacion = puntuacion,
+                    comentario = comentario.ifBlank { null }
+                )
+            )
+            response.isSuccessful
+        } catch (e: Exception) {
+            Log.e("VALORACION_REPO", "Error al actualizar: ${e.message}", e)
             false
         }
     }

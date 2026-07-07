@@ -9,6 +9,7 @@ import * as conversacionController from "./controllers/conversacion.controller.m
 import * as mensajeController from "./controllers/mensaje.controller.mjs";
 import * as notificacionController from "./controllers/notificacion.controller.mjs";
 import * as valoracionController from "./controllers/valoracion.controller.mjs";
+import * as contratoController from "./controllers/contrato.controller.mjs";
 
 const recursosGenericos = {
   usuarios: usuarioController,
@@ -19,6 +20,7 @@ const recursosGenericos = {
   conversaciones: conversacionController,
   notificaciones: notificacionController,
   valoraciones: valoracionController,
+  contratos: contratoController,
 };
 
 export const handler = async (event) => {
@@ -26,10 +28,6 @@ export const handler = async (event) => {
     const method = event.requestContext.http.method;
     const partes = (event.rawPath || "/").split("/").filter(Boolean);
     const [recurso, id, sub] = partes;
-
-    // ───────────────────────────────────────────────────────────────────────
-    // RUTAS ESPECIALES: PROJECTS
-    // ───────────────────────────────────────────────────────────────────────
     if (recurso === "projects") {
       if (method === "POST") return projectController.crearProject(event);
       if (method === "GET" && !id)
@@ -45,18 +43,13 @@ export const handler = async (event) => {
       };
     }
 
-    // ───────────────────────────────────────────────────────────────────────
-    // RUTAS ESPECIALES: POSTULACIONES (con estadísticas)
-    // ───────────────────────────────────────────────────────────────────────
     if (recurso === "postulaciones") {
-      // GET /postulaciones/estadisticas?candidatoId=xxx
       if (method === "GET" && id === "estadisticas") {
         return postulacionController.obtenerEstadisticas(
           event.queryStringParameters?.candidatoId
         );
       }
       
-      // Rutas estándar de postulaciones
       if (method === "POST") return postulacionController.crear(event);
       if (method === "GET" && !id)
         return postulacionController.listar(event.queryStringParameters);
@@ -70,9 +63,6 @@ export const handler = async (event) => {
       };
     }
 
-    // ───────────────────────────────────────────────────────────────────────
-    // RUTAS ESPECIALES: CONVERSACIONES CON MENSAJES
-    // ───────────────────────────────────────────────────────────────────────
     if (recurso === "conversaciones" && id && sub === "mensajes") {
       if (method === "GET")
         return mensajeController.getMensajes(id, event.queryStringParameters);
@@ -83,9 +73,6 @@ export const handler = async (event) => {
       };
     }
 
-    // ───────────────────────────────────────────────────────────────────────
-    // RUTAS GENÉRICAS (CRUD estándar)
-    // ───────────────────────────────────────────────────────────────────────
     const controller = recursosGenericos[recurso];
     if (!controller) {
       return {

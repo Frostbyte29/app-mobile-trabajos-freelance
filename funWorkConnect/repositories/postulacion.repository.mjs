@@ -6,7 +6,6 @@ const TIPO = "POSTULACION";
 const itemKey = (id) => ({ PK: `${TIPO}#${id}`, SK: "METADATA" });
 const stripKeys = ({ PK, SK, GSI1PK, GSI1SK, GSI2PK, GSI2SK, GSI3PK, GSI3SK, ...rest } = {}) => rest;
 
-// Crear una postulación
 export const crear = (item) => ddb.send(new PutCommand({
   TableName: TABLE,
   Item: {
@@ -20,20 +19,17 @@ export const crear = (item) => ddb.send(new PutCommand({
   },
 }));
 
-// Obtener una postulación por ID
 export const getPorId = async (id) => {
   const r = await ddb.send(new GetCommand({ TableName: TABLE, Key: itemKey(id) }));
   return { Item: r.Item ? stripKeys(r.Item) : null };
 };
 
-// Eliminar una postulación
 export const eliminar = (id) => ddb.send(new DeleteCommand({
   TableName: TABLE,
   Key: itemKey(id),
   ConditionExpression: "attribute_exists(PK)",
 }));
 
-// Actualizar campos de una postulación
 export const actualizar = async (id, updateExpression, names, values) => {
   const r = await ddb.send(new UpdateCommand({
     TableName: TABLE,
@@ -47,7 +43,6 @@ export const actualizar = async (id, updateExpression, names, values) => {
   return { Attributes: stripKeys(r.Attributes) };
 };
 
-// Listar postulaciones de un candidato (GSI2: USUARIO#candidatoId)
 export const listarPorCandidato = async (candidatoId, limit, lastKey) => {
   const r = await ddb.send(new QueryCommand({
     TableName: TABLE,
@@ -58,13 +53,12 @@ export const listarPorCandidato = async (candidatoId, limit, lastKey) => {
       ":tipo": "POSTULACION#"
     },
     Limit: limit,
-    ScanIndexForward: false, // Más recientes primero
+    ScanIndexForward: false, 
     ExclusiveStartKey: lastKey ? JSON.parse(Buffer.from(lastKey, "base64").toString()) : undefined,
   }));
   return { ...r, Items: r.Items?.map(stripKeys) || [] };
 };
 
-// Listar postulaciones de una vacante (GSI3: VACANTE#vacanteId)
 export const listarPorVacante = async (vacanteId, limit, lastKey) => {
   const r = await ddb.send(new QueryCommand({
     TableName: TABLE,
@@ -75,7 +69,7 @@ export const listarPorVacante = async (vacanteId, limit, lastKey) => {
       ":tipo": "POSTULACION#"
     },
     Limit: limit,
-    ScanIndexForward: false, // Más recientes primero
+    ScanIndexForward: false, 
     ExclusiveStartKey: lastKey ? JSON.parse(Buffer.from(lastKey, "base64").toString()) : undefined,
   }));
   return { ...r, Items: r.Items?.map(stripKeys) || [] };

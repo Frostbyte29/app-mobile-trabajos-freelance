@@ -11,4 +11,5 @@ interface ValoracionRepository {
         puntuacion: Int,
         comentario: String
     ): Boolean
+    suspend fun actualizarValoracion(valoracionId: String, puntuacion: Int, comentario: String): Boolean
 }

@@ -14,7 +14,7 @@ export const listarPorConversacion = async (conversacionId, limit, lastKey) => {
     TableName: TABLE,
     KeyConditionExpression: "PK = :p and begins_with(SK, :sk)",
     ExpressionAttributeValues: { ":p": `CONVERSACION#${conversacionId}`, ":sk": "MENSAJE#" },
-    Limit: limit, ScanIndexForward: true, // cronologico: mas antiguo primero
+    Limit: limit, ScanIndexForward: true, 
     ExclusiveStartKey: lastKey ? JSON.parse(Buffer.from(lastKey, "base64").toString()) : undefined,
   }));
   return { ...r, Items: r.Items.map(stripKeys) };

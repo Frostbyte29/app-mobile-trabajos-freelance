@@ -38,7 +38,6 @@ export const conflict = (error) =>
 export const internalError = (message = "Internal Server Error") =>
   buildResponse(500, { message });
 
-// Normalizador de errores (ej: Zod)
 const formatError = (error) => {
   if (error?.issues) {
     return {

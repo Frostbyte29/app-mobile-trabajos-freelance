@@ -2,7 +2,6 @@ package com.example.proyecto_aplicaciones_moviles.data.remote
 
 import com.google.gson.annotations.SerializedName
 
-// Molde para crear una valoración/comentario
 data class ValoracionRequestDto(
     @SerializedName("usuarioEmisorId") val usuarioEmisorId: String,
     @SerializedName("usuarioReceptorId") val usuarioReceptorId: String,
@@ -11,7 +10,6 @@ data class ValoracionRequestDto(
     @SerializedName("comentario") val comentario: String? = null
 )
 
-// Respuesta de una valoración individual
 data class ValoracionDto(
     @SerializedName("id") val id: String?,
     @SerializedName("usuarioEmisorId") val usuarioEmisorId: String?,
@@ -23,7 +21,11 @@ data class ValoracionDto(
     @SerializedName("editada") val editada: Boolean? = false
 )
 
-// Wrapper de lista de valoraciones
+data class ValoracionUpdateDto(
+    @SerializedName("puntuacion") val puntuacion: Int,
+    @SerializedName("comentario") val comentario: String?
+)
+
 data class ValoracionListResponseWrapper(
     @SerializedName("success") val success: Boolean,
     @SerializedName("data") val data: ValoracionDataWrapper?

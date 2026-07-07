@@ -2,7 +2,6 @@ import * as service from "../services/postulacion.service.mjs";
 import { postulacionSchema, estadoPostulacionSchema } from "../validators/postulacion.schema.mjs";
 import { ok, created, noContent, badRequest, notFound, conflict, internalError } from "../utils/response.mjs";
 
-// Crear una nueva postulación
 export const crear = async (event) => {
   try {
     const parsed = postulacionSchema.safeParse(JSON.parse(event.body));
@@ -25,7 +24,6 @@ export const crear = async (event) => {
   }
 };
 
-// Obtener una postulación por ID
 export const getPorId = async (id) => {
   try {
     const postulacion = await service.getPorId(id);
@@ -39,7 +37,6 @@ export const getPorId = async (id) => {
   }
 };
 
-// Actualizar el estado de una postulación
 export const actualizar = async (id, event) => {
   try {
     const parsed = estadoPostulacionSchema.safeParse(JSON.parse(event.body));
@@ -67,7 +64,6 @@ export const actualizar = async (id, event) => {
   }
 };
 
-// Eliminar una postulación
 export const eliminar = async (id) => {
   try {
     await service.eliminar(id);
@@ -78,12 +74,10 @@ export const eliminar = async (id) => {
   }
 };
 
-// Listar postulaciones con filtros
 export const listar = async (query) => {
   try {
     const limit = query?.limit ? Math.min(parseInt(query.limit), 100) : 20;
 
-    // Listar por candidato
     if (query?.candidatoId) {
       const resultado = await service.listarPorCandidato(
         query.candidatoId,
@@ -93,7 +87,6 @@ export const listar = async (query) => {
       return ok(resultado);
     }
 
-    // Listar por vacante (incluye estadísticas)
     if (query?.vacanteId) {
       const resultado = await service.listarPorVacante(
         query.vacanteId,
@@ -112,7 +105,6 @@ export const listar = async (query) => {
   }
 };
 
-// Obtener estadísticas de un candidato
 export const obtenerEstadisticas = async (candidatoId) => {
   try {
     if (!candidatoId) {
