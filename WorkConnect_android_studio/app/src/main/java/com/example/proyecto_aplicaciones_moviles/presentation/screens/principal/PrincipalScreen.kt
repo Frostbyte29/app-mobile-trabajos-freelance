@@ -194,6 +194,10 @@ private fun PestañaScreen(
             modifier = Modifier.padding(paddingValues)
         ) {
             composable(BottomNavItem.Inicio.route) {
+                // Refrescar datos cada vez que se navega a la tab de Inicio
+                LaunchedEffect(Unit) {
+                    sharedViewModel.refrescarSilencioso()
+                }
                 InicioScreen(
                     viewModel = sharedViewModel,
                     activityViewModel = activityViewModel,

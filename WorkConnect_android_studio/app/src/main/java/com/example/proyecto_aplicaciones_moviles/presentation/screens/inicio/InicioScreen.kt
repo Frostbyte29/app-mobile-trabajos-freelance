@@ -47,9 +47,10 @@ fun InicioScreen(
         viewModel.refrescarFiltro()
     }
 
+    // Polling cada 15 segundos para detectar nuevas publicaciones de otros dispositivos
     LaunchedEffect(Unit) {
         while (true) {
-            kotlinx.coroutines.delay(60_000)
+            kotlinx.coroutines.delay(15_000)
             viewModel.refrescarSilencioso()
         }
     }
