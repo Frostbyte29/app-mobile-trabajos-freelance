@@ -20,7 +20,7 @@ fun GuestPromptDialog(
                 Text(text = "¡Únete a WorkConnect!", fontWeight = FontWeight.Bold, color = Color(0xFF1A365D))
             },
             text = {
-                Text(text = "Para postular a este proyecto o publicar tus propias ofertas, necesitas iniciar sesión o crear una cuenta gratuita.")
+                Text(text = "Para postular a este proyecto o publicar tus propias ofertas, necesitas iniciar sesión o crear una cuenta gratuita.", color = Color.Black)
             },
             confirmButton = {
                 TextButton(onClick = {
@@ -32,7 +32,7 @@ fun GuestPromptDialog(
             },
             dismissButton = {
                 TextButton(onClick = { onDismiss() }) {
-                    Text("Seguir mirando", color = Color.Gray)
+                    Text("Seguir mirando", color = Color.Black)
                 }
             }
         )

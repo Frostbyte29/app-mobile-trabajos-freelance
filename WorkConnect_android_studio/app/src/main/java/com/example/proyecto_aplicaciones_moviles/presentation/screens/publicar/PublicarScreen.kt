@@ -23,6 +23,8 @@ import com.example.proyecto_aplicaciones_moviles.presentation.components.WorkCon
 import com.example.proyecto_aplicaciones_moviles.presentation.components.WorkConnectTextField
 import com.example.proyecto_aplicaciones_moviles.presentation.main.SharedProjectViewModel
 import kotlinx.coroutines.launch
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.foundation.text.KeyboardOptions
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -194,11 +196,21 @@ fun PublicarScreen(
 
             Spacer(Modifier.height(16.dp))
 
-            val labelBudget = if (tipoOferta == "trabajo") "Presupuesto ofrecido (S/.)" else "Precio de tu servicio (S/.)"
+            val labelBudget = if (tipoOferta == "trabajo") "Sueldo ofrecido (S/.)" else "Sueldo Esperado (S/.)"
             val hintBudget = if (tipoOferta == "trabajo") "Ej. 1500" else "Ej. 200"
             Text(labelBudget, fontSize = 14.sp, fontWeight = FontWeight.Medium)
             Spacer(Modifier.height(4.dp))
-            WorkConnectTextField(value = budget, onValueChange = { budget = it; errorMessage = null }, label = hintBudget)
+            WorkConnectTextField(
+                value = budget,
+                onValueChange = { nuevoValor ->
+                    if (nuevoValor.isEmpty() || nuevoValor.all { it.isDigit() }) {
+                        budget = nuevoValor
+                        errorMessage = null
+                    }
+                },
+                label = hintBudget,
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+            )
 
             Spacer(Modifier.height(16.dp))
 

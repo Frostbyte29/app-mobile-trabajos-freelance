@@ -7,12 +7,15 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -27,11 +30,18 @@ fun HistorialMensajesScreen(
     val userId = SessionManager.currentUserId
 
     if (userId.isNullOrBlank()) {
-        Box(
-            modifier = Modifier.fillMaxSize().background(Color(0xFFF8F9FA)),
-            contentAlignment = Alignment.Center
-        ) {
-            Text("Inicia sesión para ver los mensajes", color = Color.Gray)
+        Box(modifier = Modifier.fillMaxSize().background(Color(0xFFF8F9FA)), contentAlignment = Alignment.Center) {
+            Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(32.dp)) {
+                Icon(Icons.Filled.Lock, contentDescription = null, tint = Color.Gray, modifier = Modifier.size(48.dp))
+                Spacer(Modifier.height(16.dp))
+                Text(
+                    "Inicia sesión para los mensajes.",
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color(0xFF1A365D),
+                    textAlign = TextAlign.Center
+                )
+            }
         }
         return
     }

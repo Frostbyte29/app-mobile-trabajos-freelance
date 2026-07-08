@@ -25,14 +25,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
-
-// Importación clave para conectar con la fábrica de dependencias
 import com.example.proyecto_aplicaciones_moviles.di.AppContainer
-
-// Asegúrate de que las rutas a tus componentes sean las correctas
 import com.example.proyecto_aplicaciones_moviles.presentation.components.WorkConnectButton
 import com.example.proyecto_aplicaciones_moviles.presentation.components.WorkConnectTextField
 import com.example.proyecto_aplicaciones_moviles.presentation.screens.auth.AutenticacionViewModel
+import com.example.proyecto_aplicaciones_moviles.presentacion.componentes.DialogoTerminos
 
 @Composable
 fun RegistrarScreen(
@@ -46,6 +43,8 @@ fun RegistrarScreen(
     var passwordVisible by remember { mutableStateOf(false) }
     var selectedRole by remember { mutableStateOf(1) }
     var termsAccepted by remember { mutableStateOf(false) }
+    var mostrarTerminos by remember { mutableStateOf(false) }
+
     val state by viewModel.state.collectAsState()
 
     Column(
@@ -174,7 +173,12 @@ fun RegistrarScreen(
                 colors = CheckboxDefaults.colors(checkedColor = Color(0xFF1A365D))
             )
             Text(text = "Acepto los ", fontSize = 12.sp, color = Color.Gray)
-            Text(text = "Términos de Servicio", fontSize = 12.sp, color = Color(0xFF1A365D), modifier = Modifier.clickable { })
+            Text(
+                text = "Términos de Servicio",
+                fontSize = 12.sp,
+                color = Color(0xFF1A365D),
+                modifier = Modifier.clickable { mostrarTerminos = true }
+            )
         }
 
         if (state.errorMessage != null) {
@@ -226,6 +230,14 @@ fun RegistrarScreen(
             )
         }
     }
+    DialogoTerminos(
+        mostrarDialogo = mostrarTerminos,
+        alCerrar = { mostrarTerminos = false },
+        alAceptar = {
+            termsAccepted = true
+            viewModel.clearError()
+        }
+    )
 }
 
 @Composable

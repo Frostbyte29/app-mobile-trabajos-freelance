@@ -1180,8 +1180,13 @@ private fun GuestActividadContent() {
         Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(32.dp)) {
             Icon(Icons.Filled.Lock, contentDescription = null, tint = Color.Gray, modifier = Modifier.size(48.dp))
             Spacer(Modifier.height(16.dp))
-            Text("Inicia sesión para ver tu actividad.", fontSize = 16.sp,
-                fontWeight = FontWeight.Bold, color = Color.Gray, textAlign = TextAlign.Center)
+            Text(
+                "Inicia sesión para tus actividades.",
+                fontSize = 18.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color(0xFF1A365D),
+                textAlign = TextAlign.Center
+            )
         }
     }
 }
